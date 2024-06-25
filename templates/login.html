@@ -1,0 +1,23 @@
+{% extends "base.html" %}
+
+{% block title %} iTask Manager - Login {% endblock title %}
+
+{% block styles %}
+<link rel="stylesheet" href="{{url_for('static', filename='auth.css')}}">
+{% endblock styles %}
+
+{% block content %}
+<div id="form">
+    <div class="container">
+        <p>Username</p>
+        <input type="text" name="username" required>
+        <p class="to_hide">Password </p>
+        <input type="password" name="password" minlength="6" required>
+        <input class="button" type="button" value="Login" name='submit'>
+    </div>
+</div>
+{% endblock content %}
+
+{% block scripts %}
+<script src="{{url_for('static', filename='login.js')}}"></script>
+{% endblock scripts %}

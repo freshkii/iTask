@@ -1,0 +1,19 @@
+{% extends "base.html" %}
+
+{% block title %} Sign-in {% endblock title %}
+
+{% block styles %}
+<link rel="stylesheet" href="{{ url_for('static', filename='auth.css')}}">
+{% endblock styles %}
+
+{% block content %}
+<div id="form">
+    <form action="/api/auth/sign-in" method="post" class="container">
+        <p>Username</p>
+        <input type="text" name="username">
+        <p>Password</p>
+        <input type="password" name="password" minlength="6">
+        <input class="button" type="submit" value="Sign in">
+    </form>
+</div>
+{% endblock content %}

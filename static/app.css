@@ -1,0 +1,99 @@
+#app {
+    position: absolute;
+    left: 35%;
+    width: min-content;
+    height: 100%;
+    
+    display: flex;
+    flex-direction: column;
+}
+
+#create-task-button {
+    width: min-content;
+    padding: 7px;
+    margin: 5px 10px 10px;
+    
+    border-radius: 3px;
+    border: 2px solid #4169e1;
+
+    background-color: #4169e1;
+    color: white;
+}
+
+#task-container {
+    display: flex;
+    flex-direction: column;
+    gap: 5px;
+
+    overflow-y: scroll;
+    scrollbar-width:none;
+    padding-bottom: 40px;
+}
+
+.task {
+    display: flex;
+    align-items: space-around;
+    gap: 5px;
+    overflow: visible;
+}
+
+[class$='button']{
+    border-radius: 2px;
+    border: 2px solid;
+    transition-duration: 200ms;
+}
+
+[class$='button'][disabled] {
+    background-color: rgb(238, 238, 238);
+    border-color: grey;
+}
+
+.cancel-button[disabled] {
+    background-color: rgb(228, 228, 228);
+}
+
+.cancel-button, .delete-button {
+    opacity: 0;
+    visibility: hidden;
+}
+
+.task:hover > .cancel-button,
+.task:hover > .delete-button
+ {
+    visibility: visible;
+    opacity: 1;
+}
+
+.cancel-button {
+    border-color: #333138;
+    color: black;
+    background-color: white;
+}
+
+.cancel-button:hover {
+    background-color: #333138;
+    color: white;
+}
+
+.delete-button {
+    background-color: white; 
+    color: black;
+    border-radius: 2px;
+    border: 2px solid #FF312E;
+}
+
+.delete-button:hover {
+    background-color: #FF312E;  
+    color: white;
+}
+
+.modify-button {
+    border-color: #3DDC97;
+    color: black;
+    background-color: white;
+}
+
+.modify-button:hover {
+    background-color: #3DDC97;
+    color: white;
+}
