@@ -1,0 +1,168 @@
+* {
+    font-family: "Ubuntu";
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+}
+
+html {
+    width: 100%;
+    height: 100svh;
+}
+
+body {
+    height: 100%;
+    overflow-x: hidden;
+    display: flex;
+    flex-direction: column;
+}
+
+header {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    width: 100%;
+    padding: 3px 0;
+    border-bottom: 1px solid black;
+    background-color: rgb(241, 241, 241);
+    position: relative;
+}
+
+header #Title {
+    color: black;
+    margin: 5px;
+    display: flex;
+    text-decoration: none;
+}
+
+header .buttons-container {
+    display: flex;
+    position: absolute;
+    right: 10px;
+}
+
+header .buttons-container div {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+}
+
+main {
+    display: flex;
+    flex-direction: column;
+    flex-grow: 1;
+    align-items: center;
+    justify-content: center;
+}
+
+
+/* default button */
+
+button,
+input[type='button'],
+input[type='submit'],
+.button {
+    display: block;
+    padding: 4px 7px;
+    background-color: transparent;
+    border: none;
+    border-radius: 10px;
+    cursor: pointer;
+    transition: all 0.3s ease-in-out;
+    color: black;
+    font-weight: 500;
+    text-decoration: none;
+}
+
+button:hover,
+input[type='button']:hover,
+input[type='submit']:hover,
+.button:hover {
+    background-color: #d1d1d1;
+}
+
+button:focus,
+input[type='button']:focus,
+input[type='submit']:focus,
+.button:focus {
+    background-color: #6e6e73;
+}
+
+/* Primary button */
+
+button.primary,
+input[type='button'].primary,
+input[type='submit'].primary,
+.button.primary {
+    background-color: #2997ff;
+    color: white;
+}
+
+button.primary:hover,
+input[type='button'].primary:hover,
+input[type='submit'].primary:hover,
+.button.primary:hover {
+    background-color: #0071e3;
+}
+
+button.primary:focus,
+input[type='button'].primary:focus,
+input[type='submit'].primary:focus,
+.button.primary:focus {
+    background-color: #6e6e73;
+}
+
+
+/* Danger button */
+
+button.danger,
+input[type='button'].danger,
+input[type='submit'].danger,
+.button.danger {
+}
+
+button.danger:hover,
+input[type='button'].danger:hover,
+input[type='submit'].danger:hover,
+.button.danger:hover {
+    background-color: #ff3037;
+}
+
+button.danger:focus,
+input[type='button'].danger:focus,
+input[type='submit'].danger:focus,
+.button.danger:focus {
+    background-color: #300;
+}
+
+/* text input */
+
+input[type="text"],
+input[type="password"] {
+    background-color: hsl(240, 2%, 98%);
+    border: 1px #f6f6f6 solid;
+    height: 20px;
+    border-radius: 10px;
+    padding: 0 8px;
+}
+
+footer {
+    background-color: rgb(220, 230, 244);
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    width: 100%;
+    height: 10%;
+}
+
+@keyframes fade_in {
+    from {
+        opacity: 0;
+        left: 20px;
+    }
+
+    to {
+        opacity: 1;
+        left: 0;
+    }
+}

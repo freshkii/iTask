@@ -158,6 +158,12 @@ const createTask = (task) => {
     });
 
     deleteButton.addEventListener('click', () => {
+        if (task[3])
+        {
+            alert("Can't remove a disabled task");
+            return;
+        }
+
         taskDiv.remove();
         if (task[0])
         { 
@@ -212,7 +218,7 @@ getTasksRequest()
     console.log(response)
     tasks = response;
     tasks.forEach(task => {
-        task.push(true);
+        task.push(false);
         createTask(task);
     });
 });

@@ -1,19 +1,25 @@
-{% extends "base.html" %}
+{% extends "layout.html" %}
 
-{% block title %} Sign-in {% endblock title %}
+{% block title %} - Sign-in {% endblock title %}
 
 {% block styles %}
 <link rel="stylesheet" href="{{ url_for('static', filename='auth.css')}}">
 {% endblock styles %}
 
+{% block scripts %}
+<script type="module" src="{{url_for('static', filename='googleAuth.js')}}"></script>
+{% endblock scripts %}
+
 {% block content %}
-<div id="form">
-    <form action="/api/auth/sign-in" method="post" class="container">
+<h1>Sign-in</h1>
+<form id="form" onsubmit="signIn(); return false">
+    <div class="container">
         <p>Username</p>
-        <input type="text" name="username">
+        <input type="text" name="username" required>
         <p>Password</p>
-        <input type="password" name="password" minlength="6">
-        <input class="button" type="submit" value="Sign in">
-    </form>
-</div>
+        <input type="password" name="password" minlength="6" required>
+        <input class="button primary" type="submit" value="Sign in">
+    </div>
+</form>
+<button id="firebase-sign-in">Sign in with Google</button>
 {% endblock content %}
