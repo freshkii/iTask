@@ -14,7 +14,6 @@ def application():
     try:
         username = request.args['username']
         token = request.args['token']
-
     except:
         return redirect(url_for('home'))
     
@@ -24,9 +23,7 @@ def application():
         else:
             return render_template("app.html")
     except Exception as e:
-        return json.dumps("An error has occuroed")
-
-
+        return json.dumps("failure")
 
 
 @root.route("/login")
@@ -46,11 +43,14 @@ def signin_api():
     except:
         return json.dumps("failure"), 400
     
+    print(data)
+    
     try:
-        if signin_user(data['username'], data['password']):
-            return json.dumps("success"), 200
+        response = signin_user(data['username'], data['password'])
+        if response:
+            return json.dumps({'token': response}), 200
         else:
-            return json.dumps("failure"), 400
+            return json.dumps("failure")
     except Exception as e:
         print(e)
         return json.dumps("failure"), 400
@@ -64,7 +64,7 @@ def login_api():
 
     try:
         response = login_user(data["username"], data["password"])
-        if response is not None:
+        if response:
             return json.dumps({'token':response}), 200
         else:
             return json.dumps("failure"), 400

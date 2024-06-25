@@ -64,7 +64,9 @@ def signin_user(username, password):
         response = "username error"
     else:
         cursor.execute("INSERT INTO users (username, password) VALUES(?,?)", (username, password))
-        response = "good" 
+        token = generate_token()
+        cursor.execute("UPDATE users SET token = ? WHERE username = ? AND password = ?", (token, username, password))
+        response = token 
 
     conn.commit()
     conn.close()
