@@ -1,11 +1,6 @@
 #app {
-    position: absolute;
-    left: 35%;
-    width: min-content;
-    height: 100%;
-    
-    display: flex;
-    flex-direction: column;
+    width: 100%;
+    min-height: 100%;
 }
 
 #create-task-button {

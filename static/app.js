@@ -1,39 +1,72 @@
+const taskContainerDiv = document.getElementById('task-container');
+const createTaskButton = document.getElementById('create-task-button');
+let taskList = []
+
+function init() {
+    if (taskContainerDiv === null) throw new Error("Cannot get the task container \n - Add an element with id 'task-container'")
+    if (createTaskButton === null) throw new Error("Cannot get the create button \n - Add an element with id 'create-task-button'")
+
+    //get tasks
+    getTasksRequest()
+        .then(response => {
+            taskList = response.map(e => ToInternalTask(e))
+            console.log(taskList);
+            render();
+        });
+
+    function createTask() {
+        task = {
+            id: new Date().getTime(),
+            content: "",
+            checked: false,
+            canceled: false,
+            edit: true
+        };
+        taskList.push(task);
+        render();
+    }
+
+    createTaskButton.addEventListener('click', createTask);
+}
+
+function ToInternalTask(arrayTask) {
+    return { id: arrayTask[0], content: arrayTask[1], checked: arrayTask[2], canceled: arrayTask[3] }
+}
+function ToArraytask(internalTask) {
+    return [internalTask.id, internalTask.content, internalTask.checked, internalTask.canceled]
+}
 // -- REQUESTS --
 
-const performRequest = async (url, method, body) => {
-    const opts = { method: method };
+async function performRequest(url, method, body) {
+    if (url === undefined) throw new Error("Cannot perform request, please provide an URL")
+    if (method === undefined) throw new Error("Cannot perform request, please provide a Method")
 
-    if (body)
-    {
+    const opts = { method: method };
+    
+    if (body) {
         opts.headers = { 'Content-Type': 'application/json' };
         opts.body = JSON.stringify(body);
     }
     
+    console.log(opts);
     return fetch(url, opts)
         .then(async (response) => {
-            if (!response.ok)
-            {
-                console.error('Response was not ok');        
+            if (!response.ok) {
+                console.error('Response was not ok');
             }
-            return await response.json();
-        });
+            const res = await response.json();
+            console.log(res);
+            return res
+        }).catch(e => {
+            console.error(e)
+            throw new Error("Request failed")
+        })
 }
 
-const getTasksRequest = () => {
-    return performRequest(`/api/task/read?username=${username}&token=${token}`, 'GET');
-}
-
-const deleteTaskRequest = (task) => {
-    return performRequest('/api/task/delete', 'DELETE', {task:task, username: username, token: token});
-}
-
-const updateTaskRequest = (task) => { 
-    return performRequest('/api/task/update', 'PUT', {task:task, username: username, token: token});
-}
-
-const createTaskRequest = (task) => {
-    return performRequest('/api/task/create', 'POST', {task:task, username: username, token: token});
-}
+const getTasksRequest = () => performRequest(`/api/task/read?username=${username}&token=${token}`, 'GET');
+const deleteTaskRequest = (task) => performRequest('/api/task/delete', 'DELETE', { task: ToArraytask(task), username: username, token: token });
+const updateTaskRequest = (task) => performRequest('/api/task/update', 'PUT', { task: ToArraytask(task), username: username, token: token });
+const createTaskRequest = (task) => performRequest('/api/task/create', 'POST', { task: ToArraytask(task), username: username, token: token });
 
 const setAttr = (attr, value, ...elements) => {
     elements.forEach(element => {
@@ -41,11 +74,45 @@ const setAttr = (attr, value, ...elements) => {
     });
 }
 
-const taskContainerDiv = document.getElementById('task-container');
 
 // -- TASKS --
+/*
+    task: {
+        id: string;
+        content: string;
+        checked: bool,
+        canceled: bool
+    }
+
+    renderedTask: <div id={t-id} class="task ...">...</div>
+ */
 //  task : list [id, content, checked, canceled]
-const createTask = (task) => {
+
+function render() {
+    //update the current rendered list
+    //compare the rendered list with the task list
+    //-> start by cheking for new tasks to render
+    taskList.map(t => {
+        if (taskContainerDiv.querySelector("#t-" + t.id) === null) {
+            //the task doesn't exist
+            console.log('Creating task ' + t.id);
+            renderNewTask(t)
+        }
+    })
+
+    //-> then search for task to remove
+    taskContainerDiv.childNodes.entries((i, e) => {
+        if (taskList.findIndex(t => t === e.id) === null) {
+            console.log("Removing task " + e.id);
+            e.remove();
+        }
+    })
+}
+
+
+function renderNewTask(task) {
+    if (task === undefined) throw new Error("Cannot create an empty task")
+
     const taskDiv = document.createElement('div');
 
     const checkbox = document.createElement('input');
@@ -55,20 +122,21 @@ const createTask = (task) => {
     const modifyButton = document.createElement('input');
 
     taskDiv.classList.add('task');
+    taskDiv.id = "t-" + task.id
 
     checkbox.type = 'checkbox';
-    checkbox.checked = task[2];
-    checkbox.disabled = task[3];
+    checkbox.checked = task.checked;
+    checkbox.disabled = task.canceled;
 
     label.type = 'text';
-    label.value = task[1];
+    label.value = task.content;
     label.placeholder = 'fill';
-    label.disabled = task[2] || task[3]; // if task is checked or disabled
-    label.readOnly = !task[4];
+    label.disabled = task.checked || task.canceled; // if task is checked or disabled
+    label.readOnly = !task.edit;
 
     cancelButton.type = 'button';
-    cancelButton.value = task[3] ? 'enable' : 'disable';
-    cancelButton.disabled = task[2];
+    cancelButton.value = task.canceled ? 'enable' : 'disable';
+    cancelButton.disabled = task.checked;
     cancelButton.classList.add('cancel-button');
 
     deleteButton.type = 'button';
@@ -76,159 +144,128 @@ const createTask = (task) => {
     deleteButton.classList.add('delete-button');
 
     modifyButton.type = 'button';
-    modifyButton.value = task[4] ? 'save' : 'modify';
-    modifyButton.disabled = task[2] || task[3]; // if task is checked or disabled
+    modifyButton.value = task.edit ? 'save' : 'modify';
+    modifyButton.disabled = task.checked || task.canceled; // if task is checked or disabled
     modifyButton.classList.add('modify-button');
 
     taskDiv.append(checkbox, label, modifyButton, cancelButton, deleteButton);
     taskContainerDiv.appendChild(taskDiv);
 
     checkbox.addEventListener('change', () => {
-        if (task[3])
-        {
+        if (task.canceled) {
             checkbox.checked = false;
             alert("Can't check a disabled task");
             return;
         }
 
-        if (task[4])
-        {
+        if (task.edit) {
             checkbox.checked = false;
             alert("Can't check a unsaved task");
             return;
         }
 
-        if (label.value == '')
-        {
+        if (label.value == '') {
             checkbox.checked = false;
             alert("Can't check an empty task");
             return;
         }
 
-        task[2] = !task[2];
-        label.disabled = task[2];
-        cancelButton.disabled = task[2];
-        modifyButton.disabled = task[2];
+        task.checked = !task.checked;
+        label.disabled = task.checked;
+        cancelButton.disabled = task.checked;
+        modifyButton.disabled = task.checked;
 
-        if (task[0])
-        {
+        if (task.id) {
             setAttr("readOnly", true, label, checkbox, cancelButton, modifyButton, deleteButton);
 
             updateTaskRequest(task)
-            .then(() => {
-                setAttr("readOnly", false, label, checkbox, cancelButton, modifyButton, deleteButton);
-            });
+                .then(() => {
+                    setAttr("readOnly", false, label, checkbox, cancelButton, modifyButton, deleteButton);
+                });
         }
     });
 
     cancelButton.addEventListener('click', () => {
-        if (task[2])
-        {
+        if (task.checked) {
             alert("Can't cancel a checked task");
             return;
         }
 
-        if (task[4])
-        {
+        if (task.edit) {
             alert("Can't cancel a unsaved task");
             return;
         }
 
-        if (label.value == '')
-        {
+        if (label.value == '') {
             alert("Can't cancel an empty task");
             return;
         }
 
-        task[3] = !task[3];
-        label.disabled = task[3];
-        checkbox.disabled = task[3];
-        modifyButton.disabled = task[3];
+        task.canceled = !task.canceled;
+        label.disabled = task.canceled;
+        checkbox.disabled = task.canceled;
+        modifyButton.disabled = task.canceled;
         cancelButton.value = cancelButton.value == 'disable' ? 'enable' : 'disable';
 
-        if (task[0])
-        {
+        if (task.id) {
             setAttr("readOnly", true, label, checkbox, cancelButton, modifyButton, deleteButton);
 
             updateTaskRequest(task)
-            .then(() => {
-                setAttr("readOnly", false, label, checkbox, cancelButton, modifyButton, deleteButton);
-            });
+                .then(() => {
+                    setAttr("readOnly", false, label, checkbox, cancelButton, modifyButton, deleteButton);
+                });
         }
     });
 
     deleteButton.addEventListener('click', () => {
-        if (task[3])
-        {
+        if (task.canceled) {
             alert("Can't remove a disabled task");
             return;
         }
 
         taskDiv.remove();
-        if (task[0])
-        { 
+        if (task.id) {
             setAttr("readOnly", true, label, checkbox, cancelButton, modifyButton, deleteButton);
-    
+
             deleteTaskRequest(task)
-            .then(() => {
-                setAttr("readOnly", false, label, checkbox, cancelButton, modifyButton, deleteButton);
-            });
+                .then(() => {
+                    setAttr("readOnly", false, label, checkbox, cancelButton, modifyButton, deleteButton);
+                });
         }
     });
 
     modifyButton.addEventListener('click', () => {
-        if (label.value == '')
-        {
-            if (task[4])
+        if (label.value == '') {
+            if (task.edit)
                 alert("Can't save an empty task");
             return;
         }
-        
-        task[4] = !task[4];
-        label.readOnly = !task[4];
+
+        task.edit = !task.edit;
+        label.readOnly = !task.edit;
         modifyButton.value = modifyButton.value == 'modify' ? 'save' : 'modify';
 
-        if (!task[4])
-        {
-            task[1] = label.value;
-            if (task[0])
-            {     
+        if (!task.edit) {
+            task.content = label.value;
+            if (task.id) {
+                console.log("updating");
                 setAttr("readOnly", true, checkbox, cancelButton, modifyButton, deleteButton);
                 updateTaskRequest(task)
-                .then(() => {
-                    setAttr("readOnly", false, checkbox, cancelButton, modifyButton, deleteButton);
-                });
+                    .then(() => {
+                        setAttr("readOnly", false, checkbox, cancelButton, modifyButton, deleteButton);
+                    });
             }
-            else
-            {
+            else {
                 setAttr("readOnly", true, checkbox, cancelButton, modifyButton, deleteButton);
-                
+
                 createTaskRequest(task)
-                .then((response) => {
-                    task[0] = response.id;
-                    setAttr("readOnly", false, checkbox, cancelButton, modifyButton, deleteButton);
-                });
+                    .then((response) => {
+                        task.id = response.id;
+                        setAttr("readOnly", false, checkbox, cancelButton, modifyButton, deleteButton);
+                    });
             }
         }
     });
 }
 
-getTasksRequest()
-.then(response => {
-    console.log(response)
-    tasks = response;
-    tasks.forEach(task => {
-        task.push(false);
-        createTask(task);
-    });
-});
-
-const createTaskButton = document.getElementById('create-task-button');
-createTaskButton.addEventListener('click', () => {
-    task = [0, '', false, false, true];
-    createTask(task);
-    tasks.push(task);
-});
-
-window.addEventListener('beforeunload', () => {
-});
+window.addEventListener("DOMContentLoaded", init)

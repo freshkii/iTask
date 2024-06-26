@@ -33,3 +33,5 @@ async function logout() {
     }
 
 }
+
+document.addEventListener("DOMContentLoaded", init)
