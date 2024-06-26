@@ -11,7 +11,7 @@ function searchForEvents() {
     if (signInButton !== null) { signInButton.addEventListener("click", signInWithGoogle); eventRegisteredCount++; }
 
     const loginButton = document.getElementById("firebase-login");
-    if (loginButton !== null) { loginButton.addEventListener("click", loginWithGoogle); eventRegisteredCount++; }
+    if (loginButton !== null) { loginButton.addEventListener("click", signInWithGoogle); eventRegisteredCount++; }
 
 
     if (eventRegisteredCount === 0) {
