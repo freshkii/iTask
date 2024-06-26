@@ -1,57 +1,50 @@
-{% extends "layout.html" %}
-
-{% block title %}{% endblock title %}
-
-{% block styles %}
-<link rel="stylesheet" href="{{url_for('static', filename='auth.css')}}">
-{% endblock styles %}
-
-{% block scripts %}
-<script type="module" src="{{url_for('static', filename='googleAuth.js')}}"></script>
-<script>
-    function trylogin() {
-        const usernameInput = document.querySelector("input[name='username']");
-        const passwordInput = document.querySelector("input[name='password']");
-        if (usernameInput === null && username === undefined) {
-            throw new Error("Please provide a username")
-        }
-        if (passwordInput === null && password === undefined) {
-            throw new Error("Please provide a password")
-        }
-        login(usernameInput.value, passwordInput.value)
-    }
-    function trySignIn() {
-        const usernameInput = document.querySelector("input[name='username']");
-        const passwordInput = document.querySelector("input[name='password']");
-        if (usernameInput === null && username === undefined) {
-            throw new Error("Please provide a username")
-        }
-        if (passwordInput === null && password === undefined) {
-            throw new Error("Please provide a password")
-        }
-        signIn(usernameInput.value, passwordInput.value)
-    }
-</script>
-{% endblock scripts %}
-
-{% block content %}
-<h1>{% if operation == 'login' %}Login{% else%} Sign-in{% endif %}</h1>
+{% extends "layout.html" %} {% block title %}{% endblock title %} {% block
+styles %}
+<link rel="stylesheet" href="{{url_for('static', filename='auth.css')}}" />
+{% endblock styles %} {% block scripts %}
+<script
+  type="module"
+  src="{{url_for('static', filename='googleAuth.js')}}"
+></script>
+{% endblock scripts %} {% block content %}
+<body>
+<h1>{% if operation == 'login' %}Login{% else %}Sign-in{% endif %}</h1>
 {% if operation == 'login' %}
 <form id="form" onsubmit="trylogin(); return false;">
-{% else%}
-<form id="form" onsubmit="trySignIn(); return false;">
+  {% else%}
+  <form id="form" onsubmit="trySignIn(); return false;">
     {% endif %}
-    <div class="container">
-        <p>Username</p>
-        <input type="text" name="username" required>
-        <p>Password</p>
-        <input type="password" name="password" minlength="6" required>
-        <input class="button primary" type="submit" value="Login" name='submit'>
+    <div class="form-container">
+      <div class="input-container">
+        <input type="text" name="username" required />
+        <label for="username" class="input-label">Username</label>
+      </div>
+      <div class="input-container">
+        <input type="password" name="password" minlength="6" required />
+        <label for="password" class="input-label">Password</label>
+      </div>
+        <div class="google-container">
+            <input
+            class="button primary"
+            type="submit"
+            value="{% if operation == 'login' %}Login{% else%} Sign in {% endif %}"
+            name="submit"
+            id="{% if operation == 'login'%}'loginbutton'{%else%} 'signinbutton' {% endif %}"
+             />
+            </div>
+            <button type="button" id="firebase-sign-in">
+              <img
+                  src="https://www.pngall.com/wp-content/uploads/5/Google-G-Logo-PNG-Image.png"
+                  class="google-logo"
+                  width=""
+                  height="20"
+               />
+          Connect with Google
+        </button>
+      </div>
     </div>
-</form>
-<div class="provider-container">
-    <button id="firebase-sign-in">{% if operation == 'login' %}Login{% else%} Sign-in{% endif %} with Google</button>
-</div>
-{% endblock content %}
+  </form>
 
-   
+  {% endblock content %}
+</form>
+</body>
