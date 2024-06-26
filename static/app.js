@@ -16,7 +16,7 @@ function init() {
 
     function createTask() {
         task = {
-            id: new Date().getTime(),
+            id: 0,
             content: "",
             checked: false,
             canceled: false,
