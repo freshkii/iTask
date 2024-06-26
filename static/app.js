@@ -28,8 +28,7 @@ function init() {
                             canceled: false,
                             edit: true
                         };
-                        taskList.push(task);
-                        render();
+                        renderNewTask(task)
                     }
                     
                     createTaskButton.addEventListener('click', createTask);
@@ -273,6 +272,7 @@ function renderNewTask(task) {
                     .then((response) => {
                         task.id = response.id;
                         setAttr("readOnly", false, checkbox, cancelButton, modifyButton, deleteButton);
+                        render()
                     });
             }
         }
