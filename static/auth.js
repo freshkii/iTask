@@ -1,3 +1,6 @@
+const token = localStorage.getItem("token");
+const username = localStorage.getItem('username');
+
 async function login(username, password) {
     //TODO: Add provider type to bypass password verification
     if (username === undefined || password === undefined) {
@@ -64,6 +67,27 @@ async function signIn(username, password) {
         }
     }
 }
+async function logout() {
+    const response = await fetch('/api/auth/logout', {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/json'
+        },
+        body: JSON.stringify({
+            username: username,
+            token: token
+        })
+    });
+
+    if (!response.ok) {
+        throw new Error("Cannot logout");
+    } else {
+        localStorage.removeItem('token');
+        localStorage.removeItem('username');
+        window.location.replace('/');
+    }
+
+}
 
 async function userExist(username) {
     try {
@@ -87,4 +111,34 @@ async function userExist(username) {
     } catch {
         return false
     }
+}
+
+async function checkSession() {
+    if (!isLogged()) return false
+    else {
+        //check on server token and username
+        const response = await fetch('/api/auth/valid-session', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json'
+            },
+            body: JSON.stringify({
+                username: username,
+                token: token
+            })
+        })
+        if (!response.ok) {
+            console.error(response);
+            console.error(await response.json());
+            throw new Error("Cannot check session");
+        } else {
+            const a = await response.json();
+            console.log(a)
+            return a;
+        }
+    }
+}
+
+function isLogged() {
+    return token !== null && username !== null;
 }

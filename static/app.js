@@ -3,30 +3,39 @@ const createTaskButton = document.getElementById('create-task-button');
 let taskList = [];
 
 function init() {
-    if (taskContainerDiv === null) throw new Error("Cannot get the task container \n - Add an element with id 'task-container'");
-    if (createTaskButton === null) throw new Error("Cannot get the create button \n - Add an element with id 'create-task-button'");
+    if (taskContainerDiv === null) throw new Error("Cannot get the task container \n - Add an element with id 'task-container'")
+    if (createTaskButton === null) throw new Error("Cannot get the create button \n - Add an element with id 'create-task-button'")
+    //check for session
+    checkSession()
+        .then(isAuthorized => {
+            console.log(isAuthorized);
+            if (!isAuthorized) window.location.assign("/");
+            else document.getElementById("loader").remove()
+            //get tasks
+            getTasksRequest()
+                .then(response => {
+                    taskList = response.map(e => ToInternalTask(e))
+                    console.log(taskList);
+                    render();
+                });
 
-    //get tasks
-    getTasksRequest()
-        .then(response => {
-            taskList = response.map(e => ToInternalTask(e))
-            console.log(taskList);
-            render();
-        });
+            function createTask() {
+                task = {
+                    id: 0,
+                    content: "",
+                    checked: false,
+                    canceled: false,
+                    edit: true
+                };
+                taskList.push(task);
+                render();
+            }
 
-    function createTask() {
-        task = {
-            id: 0,
-            content: "",
-            checked: false,
-            canceled: false,
-            edit: true
-        };
-        taskList.push(task);
-        render();
-    }
-
-    createTaskButton.addEventListener('click', createTask);
+            createTaskButton.addEventListener('click', createTask);
+        }).catch(e => {
+            console.error(e);
+            throw new Error("Cannot check for session")
+        })
 }
 
 function ToInternalTask(arrayTask) {
@@ -42,21 +51,18 @@ async function performRequest(url, method, body) {
     if (method === undefined) throw new Error("Cannot perform request, please provide a Method");
 
     const opts = { method: method };
-    
+
     if (body) {
         opts.headers = { 'Content-Type': 'application/json' };
         opts.body = JSON.stringify(body);
     }
-    
-    console.log(opts);
+
     return fetch(url, opts)
         .then(async (response) => {
             if (!response.ok) {
                 console.error('Response was not ok');
             }
-            const res = await response.json();
-            console.log(res);
-            return res;
+            return await response.json();
         }).catch(e => {
             console.error(e);
             throw new Error("Request failed");

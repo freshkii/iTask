@@ -96,7 +96,7 @@ def validsession_api():
         return json.dumps("failure"), 400
     
     try:
-        response = username_exists(data["username"], data["token"])
+        response = valid_user_token(data["username"], data["token"])
         if response: 
             return json.dumps(True)
         else:
