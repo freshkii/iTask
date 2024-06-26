@@ -81,6 +81,8 @@ def valid_user_token(username, token):
     conn = connect()
     cursor = conn.cursor()
 
+    print(cursor)
+
     if not(username and token):
         return False
     cursor.execute("SELECT id FROM users WHERE username = ? and token = ?", (username, token))
@@ -110,6 +112,7 @@ def signin_user(username, password):
     return response
 
 def login_user(username, password):
+    #TODO: Add provider type to bypass password verification
     conn = connect()
     cursor = conn.cursor()
 
