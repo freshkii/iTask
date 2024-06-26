@@ -78,7 +78,8 @@ def logout_api():
     except:
         return json.dumps("failure"), 400
 
-    if logout_user(data["username"], data["token"]):
+    res = logout_user(data["username"], data["token"])
+    if res:
         return json.dumps("success")
     else:
         return json.dumps("failure db"), 401

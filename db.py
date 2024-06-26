@@ -4,10 +4,12 @@ from os.path import exists
 import secrets
 import hashlib
 
+data = 'data.db'
+
 def init_db():
-    with open('/data/data.db', 'w') as db:
+    with open(data, 'w') as db:
         pass
-    conn = sqlite3.connect('/data/data.db')
+    conn = sqlite3.connect(data)
     cursor = conn.cursor()
     cursor.execute("""CREATE TABLE tasks (
                         id INTEGER PRIMARY KEY AUTOINCREMENT,
@@ -32,16 +34,12 @@ def init_db():
     conn.commit()
     conn.close()
 
-if not exists('/data/data.db'):
+if not exists(data):
     init_db()
 
 
 def connect():
-    return sqlite3.connect('/data/data.db')
-
-def test(cursor):
-    cursor.execute('SELECT * FROM users')
-    print(cursor.fetchall())
+    return sqlite3.connect(data)
 
 # -- AUTH --
 
@@ -70,7 +68,9 @@ def username_exists(username):
 def valid_user_password(username, password):
     conn = connect()
     cursor = conn.cursor()
-
+    
+    print(username, password)
+    
     cursor.execute("SELECT id FROM users WHERE username = ? AND password = ?", (username, hash(password)))
     res = cursor.fetchone()
 
@@ -80,8 +80,6 @@ def valid_user_password(username, password):
 def valid_user_token(username, token):
     conn = connect()
     cursor = conn.cursor()
-
-    print(cursor)
 
     if not(username and token):
         return False
@@ -95,17 +93,18 @@ def signin_user(username, password):
     conn = connect()
     cursor = conn.cursor()
 
-    password = hash(password)
 
     if username_exists(username):
         response = None
     else:
+        password = hash(password)
         cursor.execute("INSERT INTO users (username, password) VALUES(?,?)", (username, password))
 
         token = generate_token()
         cursor.execute("UPDATE users SET token = ? WHERE username = ? AND password = ?", (token, username, password))
 
         response = token 
+        print(token)
 
     conn.commit()
     conn.close()
@@ -116,8 +115,6 @@ def login_user(username, password):
     conn = connect()
     cursor = conn.cursor()
 
-    test(cursor)
-
     if not valid_user_password(username, password):
         return None 
     
@@ -125,21 +122,21 @@ def login_user(username, password):
 
     token = generate_token()
     cursor.execute("UPDATE users SET token = ? WHERE username = ? AND password = ?", (token, username, password))
+    print(token)
 
     conn.commit()
     conn.close()
     return token
 
-def logout_user(username, password):
+def logout_user(username, token):
     conn = connect()
     cursor = conn.cursor()
 
-    if not valid_user_password(username, password):
+
+    if not valid_user_token(username, token):
         return None
 
-    password = hash(password)
-
-    cursor.execute("UPDATE users SET token = NULL WHERE username = ? AND password = ?", (username, password))
+    cursor.execute("UPDATE users SET token = NULL WHERE username = ? AND token = ?", (username, token))
     res = cursor.rowcount
 
     conn.commit()
