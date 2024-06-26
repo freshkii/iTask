@@ -53,7 +53,7 @@ def signin_api():
             return json.dumps("failure")
     except Exception as e:
         print(e)
-        return json.dumps("failure"), 400
+        return json.dumps("failure db"), 401
 
 @auth.route("/login", methods=["POST"])
 def login_api():
@@ -70,7 +70,7 @@ def login_api():
             return json.dumps("failure"), 400
     except Exception as e:
         print(e)
-        return json.dumps("failure"), 400
+        return json.dumps("failure db"), 401
 
 @auth.route("/logout", methods=["POST"])
 def logout_api():
@@ -82,7 +82,7 @@ def logout_api():
     if logout_user(data["username"], data["token"]):
         return json.dumps("success")
     else:
-        return json.dumps("failure")
+        return json.dumps("failure db"), 401
 
 
 task = Blueprint("task", __name__, static_folder="static", template_folder="templates")

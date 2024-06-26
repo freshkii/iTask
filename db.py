@@ -1,10 +1,47 @@
 import sqlite3
+from os.path import exists
 
 import secrets
 import hashlib
 
+def init_db():
+    with open('/data/data.db', 'w') as db:
+        pass
+    conn = sqlite3.connect('/data/data.db')
+    cursor = conn.cursor()
+    cursor.execute("""CREATE TABLE tasks (
+                        id INTEGER PRIMARY KEY AUTOINCREMENT,
+                        content TEXT NOT NULL,
+                        checked INTEGER NOT NULL,
+                        canceled INTEGER NOT NULL,
+                        user_id INTEGER NOT NULL,
+                        FOREIGN KEY (user_id)
+                        REFERENCES user(id)
+                            ON DELETE CASCADE
+                    )""")
+    
+    # "SELECT * FROM tasks WHERE user_id = ?", (id)
+    
+    cursor.execute("""CREATE TABLE users (
+                       id INTEGER PRIMARY KEY AUTOINCREMENT,
+                       username TEXT NOT NULL UNIQUE,
+                       password TEXT NOT NULL check(length(password) >= 6),
+                       token TEXT
+                  )""")
+    
+    conn.commit()
+    conn.close()
+
+if not exists('/data/data.db'):
+    init_db()
+
+
 def connect():
-    return sqlite3.connect('data.db')
+    return sqlite3.connect('/data/data.db')
+
+def test(cursor):
+    cursor.execute('SELECT * FROM users')
+    print(cursor.fetchall())
 
 # -- AUTH --
 
@@ -58,14 +95,14 @@ def signin_user(username, password):
 
     password = hash(password)
 
-    response = None
-
     if username_exists(username):
-        response = "username error"
+        response = None
     else:
         cursor.execute("INSERT INTO users (username, password) VALUES(?,?)", (username, password))
+
         token = generate_token()
         cursor.execute("UPDATE users SET token = ? WHERE username = ? AND password = ?", (token, username, password))
+
         response = token 
 
     conn.commit()
@@ -75,6 +112,8 @@ def signin_user(username, password):
 def login_user(username, password):
     conn = connect()
     cursor = conn.cursor()
+
+    test(cursor)
 
     if not valid_user_password(username, password):
         return None 
