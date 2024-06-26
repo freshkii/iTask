@@ -8,30 +8,35 @@ function init() {
     //check for session
     checkSession()
         .then(isAuthorized => {
-            console.log(isAuthorized);
-            if (!isAuthorized) window.location.assign("/");
-            else document.getElementById("loader").remove()
-            //get tasks
-            getTasksRequest()
+            if (!isAuthorized) {
+                console.warn("UnauthorizedError: User not logged");
+                window.location.assign("/");
+            }
+            else {
+                //get tasks
+                getTasksRequest()
                 .then(response => {
                     taskList = response.map(e => ToInternalTask(e))
-                    console.log(taskList);
                     render();
-                });
-
-            function createTask() {
-                task = {
-                    id: 0,
-                    content: "",
-                    checked: false,
-                    canceled: false,
-                    edit: true
-                };
-                taskList.push(task);
-                render();
-            }
-
-            createTaskButton.addEventListener('click', createTask);
+                    });
+                    
+                    function createTask() {
+                        task = {
+                            id: 0,
+                            content: "",
+                            checked: false,
+                            canceled: false,
+                            edit: true
+                        };
+                        taskList.push(task);
+                        render();
+                    }
+                    
+                    createTaskButton.addEventListener('click', createTask);
+                    setTimeout(() => {
+                        document.getElementById("loader").remove()
+                    }, 500);
+                }
         }).catch(e => {
             console.error(e);
             throw new Error("Cannot check for session")

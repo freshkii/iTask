@@ -29,7 +29,7 @@ async function login(username, password) {
             localStorage.setItem('token', data['token']);
             localStorage.setItem('username', username);
             console.info("successfuly logged with token " + localStorage.getItem('token'))
-            window.location.assign(`/app?username=${localStorage.getItem('username')}&token=${localStorage.getItem('token')}`);
+            window.location.assign(`/app`);
         }
     }
 }
@@ -63,7 +63,7 @@ async function signIn(username, password) {
             console.info("Successfully signed-in");
             localStorage.setItem('token', data['token']);
             localStorage.setItem('username', username);
-            window.location.replace(`/app?username=${localStorage.getItem('username')}&token=${localStorage.getItem('token')}`);
+            window.location.replace(`/app`);
         }
     }
 }
@@ -131,11 +131,8 @@ async function checkSession() {
             console.error(response);
             console.error(await response.json());
             throw new Error("Cannot check session");
-        } else {
-            const a = await response.json();
-            console.log(a)
-            return a;
-        }
+        } else return await response.json();
+
     }
 }
 
