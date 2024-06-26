@@ -9,6 +9,7 @@
 {% block content %}
 <div id="app">
     <div id=loader>
+        <img src="{{ url_for('static', filename='assets/loading.svg')}}">
         <h4>Loading...</h4>
     </div>
     <input type="button" id="create-task-button" value="Create Task">

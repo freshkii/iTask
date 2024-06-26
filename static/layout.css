@@ -133,7 +133,7 @@ button.danger:focus,
 input[type='button'].danger:focus,
 input[type='submit'].danger:focus,
 .button.danger:focus {
-    background-color: #300;
+    background-color: hsl(0, 100%, 40%);
 }
 
 /* text input */
