@@ -28,11 +28,11 @@ def application():
 
 @root.route("/login")
 def login():
-    return render_template("login.html")
+    return render_template("auth.html", operation='login')
 
 @root.route("/sign-in")
 def signin():
-    return render_template("sign-in.html")
+    return render_template("auth.html", operation="sign-in")
 
 auth = Blueprint("auth", __name__, static_folder="static", template_folder="templates")
 
@@ -42,8 +42,6 @@ def signin_api():
         data = request.json
     except:
         return json.dumps("failure"), 400
-    
-    print(data)
     
     try:
         response = signin_user(data['username'], data['password'])
@@ -57,6 +55,7 @@ def signin_api():
 
 @auth.route("/login", methods=["POST"])
 def login_api():
+    #TODO: Add provider type to bypass password verification
     try:
         data = request.json
     except:
@@ -83,6 +82,20 @@ def logout_api():
         return json.dumps("success")
     else:
         return json.dumps("failure")
+
+@auth.route("/getuser", methods=["POST"])
+def getuser_api():
+    try:
+        data = request.json
+    except:
+        return json.dumps("failure"), 400
+    
+    try:
+        response = username_exists(data["username"])
+        return json.dumps(response);
+    except Exception as e:
+        print(e)
+        return json.dumps("failure"), 400
 
 
 task = Blueprint("task", __name__, static_folder="static", template_folder="templates")

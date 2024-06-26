@@ -73,6 +73,7 @@ def signin_user(username, password):
     return response
 
 def login_user(username, password):
+    #TODO: Add provider type to bypass password verification
     conn = connect()
     cursor = conn.cursor()
 
