@@ -1,10 +1,10 @@
 const taskContainerDiv = document.getElementById('task-container');
 const createTaskButton = document.getElementById('create-task-button');
-let taskList = []
+let taskList = [];
 
 function init() {
-    if (taskContainerDiv === null) throw new Error("Cannot get the task container \n - Add an element with id 'task-container'")
-    if (createTaskButton === null) throw new Error("Cannot get the create button \n - Add an element with id 'create-task-button'")
+    if (taskContainerDiv === null) throw new Error("Cannot get the task container \n - Add an element with id 'task-container'");
+    if (createTaskButton === null) throw new Error("Cannot get the create button \n - Add an element with id 'create-task-button'");
 
     //get tasks
     getTasksRequest()
@@ -30,16 +30,16 @@ function init() {
 }
 
 function ToInternalTask(arrayTask) {
-    return { id: arrayTask[0], content: arrayTask[1], checked: arrayTask[2], canceled: arrayTask[3] }
+    return { id: arrayTask[0], content: arrayTask[1], checked: arrayTask[2], canceled: arrayTask[3] };
 }
 function ToArraytask(internalTask) {
-    return [internalTask.id, internalTask.content, internalTask.checked, internalTask.canceled]
+    return [internalTask.id, internalTask.content, internalTask.checked, internalTask.canceled];
 }
 // -- REQUESTS --
 
 async function performRequest(url, method, body) {
-    if (url === undefined) throw new Error("Cannot perform request, please provide an URL")
-    if (method === undefined) throw new Error("Cannot perform request, please provide a Method")
+    if (url === undefined) throw new Error("Cannot perform request, please provide an URL");
+    if (method === undefined) throw new Error("Cannot perform request, please provide a Method");
 
     const opts = { method: method };
     
@@ -56,10 +56,10 @@ async function performRequest(url, method, body) {
             }
             const res = await response.json();
             console.log(res);
-            return res
+            return res;
         }).catch(e => {
-            console.error(e)
-            throw new Error("Request failed")
+            console.error(e);
+            throw new Error("Request failed");
         })
 }
 

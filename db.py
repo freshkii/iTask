@@ -6,10 +6,13 @@ import hashlib
 
 data = 'data.db'
 
+def connect():
+    return sqlite3.connect(data)
+
 def init_db():
     with open(data, 'w') as db:
         pass
-    conn = sqlite3.connect(data)
+    conn = connect()
     cursor = conn.cursor()
     cursor.execute("""CREATE TABLE tasks (
                         id INTEGER PRIMARY KEY AUTOINCREMENT,
@@ -22,8 +25,6 @@ def init_db():
                             ON DELETE CASCADE
                     )""")
     
-    # "SELECT * FROM tasks WHERE user_id = ?", (id)
-    
     cursor.execute("""CREATE TABLE users (
                        id INTEGER PRIMARY KEY AUTOINCREMENT,
                        username TEXT NOT NULL UNIQUE,
@@ -34,12 +35,10 @@ def init_db():
     conn.commit()
     conn.close()
 
+# creates database
+
 if not exists(data):
     init_db()
-
-
-def connect():
-    return sqlite3.connect(data)
 
 # -- AUTH --
 
@@ -68,8 +67,6 @@ def username_exists(username):
 def valid_user_password(username, password):
     conn = connect()
     cursor = conn.cursor()
-    
-    print(username, password)
     
     cursor.execute("SELECT id FROM users WHERE username = ? AND password = ?", (username, hash(password)))
     res = cursor.fetchone()
@@ -104,7 +101,6 @@ def signin_user(username, password):
         cursor.execute("UPDATE users SET token = ? WHERE username = ? AND password = ?", (token, username, password))
 
         response = token 
-        print(token)
 
     conn.commit()
     conn.close()
@@ -122,7 +118,6 @@ def login_user(username, password):
 
     token = generate_token()
     cursor.execute("UPDATE users SET token = ? WHERE username = ? AND password = ?", (token, username, password))
-    print(token)
 
     conn.commit()
     conn.close()
@@ -137,12 +132,11 @@ def logout_user(username, token):
         return None
 
     cursor.execute("UPDATE users SET token = NULL WHERE username = ? AND token = ?", (username, token))
-    res = cursor.rowcount
+    res = bool(cursor.rowcount)
 
     conn.commit()
     conn.close()
-    return bool(res)
-
+    return res
 
 # -- TASKS --
 
@@ -166,7 +160,11 @@ def create_task(username,token,task):
     if not valid_user_token(username,token):
         return "user not found error"
 
-    if int(task[0]) == 0:
+    try:
+        task[0] = int(task[0])
+    except:
+        return "bad request"
+    if task[0] == 0:
         cursor.execute("INSERT INTO tasks (content, checked, canceled, user_id) VALUES (?,?,?, (SELECT id FROM users WHERE username = ? AND token = ?))", (task[1], task[2], task[3], username, token))
         id = cursor.lastrowid
         conn.commit()
@@ -177,12 +175,14 @@ def create_task(username,token,task):
     return id
 
 def get_tasks (username,token):
+    # establish connection with db
     conn = connect()
     cursor = conn.cursor()
 
     if not valid_user_token(username,token):
         return "user not found error"
 
+    # make request
     cursor.execute("SELECT id, content, checked, canceled FROM tasks WHERE user_id = (SELECT id FROM users WHERE username = ? and token = ? ) ORDER BY id ASC",(username,token))
     response = cursor.fetchall()
 
@@ -190,15 +190,17 @@ def get_tasks (username,token):
     return response
 
 def delete_task (username,token,task):
+    # establish connection with db
     conn = connect()
     cursor = conn.cursor()
 
     if not valid_user_token(username,token):
         return "user not found error"
 
+    # make request
     cursor.execute("DELETE FROM tasks WHERE id=? AND user_id = (SELECT id FROM users WHERE username = ? and token = ?)", (task[0],username,token))
 
-    res = bool(cursor.lastrowid)
+    res = bool(cursor.rowcount)
 
     conn.commit()
     conn.close()

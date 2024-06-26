@@ -5,26 +5,15 @@ from db import *
 
 root = Blueprint("/", __name__, static_folder="static", template_folder="templates")
 
+# update requests responses
+
 @root.route("/")
 def home():
     return render_template("home.html")
 
 @root.route("/app")
 def application():
-    try:
-        username = request.args['username']
-        token = request.args['token']
-    except:
-        return redirect(url_for('home'))
-    
-    try:
-        if not valid_user_token(username, token):
-            return redirect(url_for('home'))
-        else:
-            return render_template("app.html")
-    except Exception as e:
-        return json.dumps("failure")
-
+    return render_template("app.html")
 
 @root.route("/login")
 def login():
@@ -40,18 +29,20 @@ auth = Blueprint("auth", __name__, static_folder="static", template_folder="temp
 def signin_api():
     try:
         data = request.json
+        username = data["username"]
+        password = data["password"]
     except:
         return json.dumps("failure"), 400
     
     try:
-        response = signin_user(data['username'], data['password'])
+        response = signin_user(username, password)
         if response:
             return json.dumps({'token': response}), 200
         else:
-            return json.dumps("failure")
+            return json.dumps("failure"), 400
     except Exception as e:
         print(e)
-        return json.dumps("failure db"), 401
+        return json.dumps("failure"), 500
 
 @auth.route("/login", methods=["POST"])
 def login_api():
@@ -93,10 +84,26 @@ def getuser_api():
     
     try:
         response = username_exists(data["username"])
-        return json.dumps(response);
-    except Exception as e:
-        print(e)
+        return json.dumps(response)
+    except:
         return json.dumps("failure"), 400
+
+@auth.route("/valid-session", methods=["POST"])
+def validsession_api():
+    try:
+        data = request.json
+    except:
+        return json.dumps("failure"), 400
+    
+    try:
+        response = username_exists(data["username"], data["token"])
+        if response: 
+            return json.dumps(True)
+        else:
+            return json.dumps(False)
+    except:
+        return json.dumps("failure"), 400
+        
 
 
 task = Blueprint("task", __name__, static_folder="static", template_folder="templates")
@@ -105,7 +112,6 @@ task = Blueprint("task", __name__, static_folder="static", template_folder="temp
 def read():
     if not request.args:
         return json.dumps("error no args")
-
     try:
         tasks = get_tasks(request.args.get("username"), request.args.get("token"))
         return json.dumps(tasks)

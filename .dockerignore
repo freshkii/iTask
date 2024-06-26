@@ -31,5 +31,5 @@
 **/secrets.dev.yaml
 **/values.dev.yaml
 LICENSE
-.md
+**/*.md
 **/*.db
