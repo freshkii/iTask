@@ -1,7 +1,17 @@
 from flask import Blueprint, render_template,  redirect, url_for, request
 import json
 
+from google.oauth2.credentials import Credentials
+from google_auth_oauthlib.flow import Flow
+from google.auth.transport.requests import Request
+
 from db import *
+
+
+
+flow = Flow.from_client_secrets_file("client_secrets.json", scopes=['https://www.googleapis.com/auth/userinfo.profile'])
+
+flow.redirect_uri = "http://127.0.0.1/oauth"
 
 root = Blueprint("/", __name__, static_folder="static", template_folder="templates")
 
