@@ -1,31 +1,18 @@
-.provider-container {
-  margin-top: 3vh;
-}
 #form {
   display: flex;
   align-items: center;
   justify-content: center;
   flex-direction: column;
-  height: 100%;
-  position: relative;
-  animation: fade_in 1.3s;
-  zoom: 150%;
-}
-
-body {
-  display: flex;
-  justify-content: center;
-  align-items: center;
-  height: 100vh;
-  margin: 0;
-  background-color: #f0f0f0;
-}
-
-.form-container {
-  background: #ffffff;
+  background-color: var(--background-primary);
   padding: 20px;
-  border-radius: 8px;
+  border-radius: 10px;
   box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+  position: relative;
+  animation: fade_in 0.5s;
+}
+
+.provider-container {
+  margin-top: 3vh;
 }
 
 .input-container {
@@ -44,6 +31,7 @@ input[type="password"] {
   transition:
     border-color 0.3s ease,
     box-shadow 0.3s ease;
+  background-color: #FFF;
 }
 
 input[type="text"]:focus,
@@ -67,12 +55,14 @@ input[type="password"]:valid {
     font-size 0.3s ease,
     transform 0.3s ease;
   cursor: text;
+  pointer-events: none;
+  border-radius: 5px;
 }
 
-input[type="text"]:focus + .input-label,
-input[type="text"]:valid + .input-label,
-input[type="password"]:focus + .input-label,
-input[type="password"]:valid + .input-label {
+input[type="text"]:focus+.input-label,
+input[type="text"]:valid+.input-label,
+input[type="password"]:focus+.input-label,
+input[type="password"]:valid+.input-label {
   top: -5px;
   font-size: 10px;
   transform: translate(-5px);
@@ -101,7 +91,6 @@ input[type="submit"] {
 }
 
 #firebase-sign-in {
-  background-color: #ffffff;
   width: 100%;
   border: none;
   padding: 4px;
@@ -114,10 +103,6 @@ input[type="submit"] {
   gap: 10px;
 }
 
-#firebase-sign-in:hover {
-  background-color: #f0f0f0;
-}
-
 h1 {
-  padding: 10px;
+  margin-bottom: 10px;
 }

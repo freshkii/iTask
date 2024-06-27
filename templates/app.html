@@ -12,8 +12,15 @@
         <img src="{{ url_for('static', filename='assets/loading.svg')}}">
         <h4>Loading...</h4>
     </div>
-    <input type="button" id="create-task-button" value="Create Task">
+    <input type="button" id="create-task-button" value="Add task">
     <div id="task-container">
+        <!--<div class="task" id="t-1">
+            <input type="checkbox">
+            <input type="text" placeholder="fill" readonly="">
+            <button><img src="{{ url_for('static', filename='assets/crayon.svg')}}" class="modify-button"></button>
+            <input type="button" value="disable" class="cancel-button">
+            <button><img src="{{ url_for('static', filename='assets/delete.svg')}}" class="delete-button"></button>
+        </div>-->
     </div>
 </div>
 {% endblock content %}

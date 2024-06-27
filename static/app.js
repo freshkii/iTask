@@ -15,27 +15,16 @@ function init() {
             else {
                 //get tasks
                 getTasksRequest()
-                .then(response => {
-                    taskList = response.map(e => ToInternalTask(e))
-                    render();
+                    .then(response => {
+                        taskList = response.map(e => ToInternalTask(e))
+                        render();
                     });
-                    
-                    function createTask() {
-                        task = {
-                            id: 0,
-                            content: "",
-                            checked: false,
-                            canceled: false,
-                            edit: true
-                        };
-                        renderNewTask(task)
-                    }
-                    
-                    createTaskButton.addEventListener('click', createTask);
-                    setTimeout(() => {
-                        document.getElementById("loader").remove()
-                    }, 500);
-                }
+
+                createTaskButton.addEventListener('click', renderTaskInput);
+                setTimeout(() => {
+                    document.getElementById("loader").remove()
+                }, 500);
+            }
         }).catch(e => {
             console.error(e);
             throw new Error("Cannot check for session")
@@ -74,9 +63,22 @@ async function performRequest(url, method, body) {
 }
 
 const getTasksRequest = () => performRequest(`/api/task/read?username=${username}&token=${token}`, 'GET');
-const deleteTaskRequest = (task) => performRequest('/api/task/delete', 'DELETE', { task: ToArraytask(task), username: username, token: token });
-const updateTaskRequest = (task) => performRequest('/api/task/update', 'PUT', { task: ToArraytask(task), username: username, token: token });
-const createTaskRequest = (task) => performRequest('/api/task/create', 'POST', { task: ToArraytask(task), username: username, token: token });
+function deleteTaskRequest(task) {
+    taskList.splice(taskList.findIndex(t => t.id === task.id), 1);
+    render();
+    return performRequest('/api/task/delete', 'DELETE', { task: ToArraytask(task), username: username, token: token });
+}
+function updateTaskRequest(task) {
+    taskList[taskList.findIndex(t => t.id === task.id)] = task
+    render();
+    return performRequest('/api/task/update', 'PUT', { task: ToArraytask(task), username: username, token: token });
+}
+async function createTaskRequest(task) {
+    const response = await performRequest('/api/task/create', 'POST', { task: ToArraytask(task), username: username, token: token });
+    taskList.push({ ...task, id: response.id })
+    render();
+    return response
+}
 
 const setAttr = (attr, value, ...elements) => {
     elements.forEach(element => {
@@ -105,18 +107,21 @@ function render() {
     taskList.map(t => {
         if (taskContainerDiv.querySelector("#t-" + t.id) === null) {
             //the task doesn't exist
-            console.log('Creating task ' + t.id);
+            console.info('Creating task ' + t.id);
             renderNewTask(t)
         }
     })
 
     //-> then search for task to remove
-    taskContainerDiv.childNodes.entries((i, e) => {
-        if (taskList.findIndex(t => t === e.id) === null) {
-            console.log("Removing task " + e.id);
-            e.remove();
+    var children = taskContainerDiv.children;
+    for (var i = 0; i < children.length; i++) {
+        var child = children[i];
+        if (taskList.findIndex(t => t.id === Number.parseInt(child.id.slice(2))) === -1) {
+            console.info("Removing task " + child.id);
+            child.remove();
         }
-    })
+    }
+
 }
 
 
@@ -128,8 +133,8 @@ function renderNewTask(task) {
     const checkbox = document.createElement('input');
     const label = document.createElement('input');
     const cancelButton = document.createElement('input');
-    const deleteButton = document.createElement('input');
-    const modifyButton = document.createElement('input');
+    const deleteButton = document.createElement('button');
+    const modifyButton = document.createElement('button');
 
     taskDiv.classList.add('task');
     taskDiv.id = "t-" + task.id
@@ -137,25 +142,30 @@ function renderNewTask(task) {
     checkbox.type = 'checkbox';
     checkbox.checked = task.checked;
     checkbox.disabled = task.canceled;
+    checkbox.style.display = task.canceled ? "none" : "block"
 
     label.type = 'text';
     label.value = task.content;
     label.placeholder = 'fill';
-    label.disabled = task.checked || task.canceled; // if task is checked or disabled
-    label.readOnly = !task.edit;
+    label.disabled = !task.edit || task.checked || task.canceled; // if task is checked or disabled
 
     cancelButton.type = 'button';
     cancelButton.value = task.canceled ? 'enable' : 'disable';
     cancelButton.disabled = task.checked;
     cancelButton.classList.add('cancel-button');
+    cancelButton.style.display = task.checked ? "none" : "block"
 
-    deleteButton.type = 'button';
-    deleteButton.value = 'delete';
+    const deleteButtonImage = document.createElement("img");
+    deleteButtonImage.src = '/static/assets/corbeille-xmark.svg';
+    deleteButton.appendChild(deleteButtonImage)
     deleteButton.classList.add('delete-button');
+    deleteButton.style.display = task.canceled ? "none" : "block"
 
-    modifyButton.type = 'button';
-    modifyButton.value = task.edit ? 'save' : 'modify';
+    const modifyButtonImage = document.createElement("img");
+    modifyButtonImage.src = task.edit ? '/static/assets/verifier.svg' : "/static/assets/crayon.svg";
+    modifyButton.appendChild(modifyButtonImage)
     modifyButton.disabled = task.checked || task.canceled; // if task is checked or disabled
+    modifyButton.style.display = task.checked || task.canceled ? "none" : "block"
     modifyButton.classList.add('modify-button');
 
     taskDiv.append(checkbox, label, modifyButton, cancelButton, deleteButton);
@@ -183,11 +193,12 @@ function renderNewTask(task) {
         task.checked = !task.checked;
         label.disabled = task.checked;
         cancelButton.disabled = task.checked;
+        cancelButton.style.display = task.checked || task.canceled ? "none" : "block"
         modifyButton.disabled = task.checked;
+        modifyButton.style.display = task.checked || task.canceled ? "none" : "block"
 
         if (task.id) {
             setAttr("readOnly", true, label, checkbox, cancelButton, modifyButton, deleteButton);
-
             updateTaskRequest(task)
                 .then(() => {
                     setAttr("readOnly", false, label, checkbox, cancelButton, modifyButton, deleteButton);
@@ -216,6 +227,9 @@ function renderNewTask(task) {
         checkbox.disabled = task.canceled;
         modifyButton.disabled = task.canceled;
         cancelButton.value = cancelButton.value == 'disable' ? 'enable' : 'disable';
+        modifyButton.style.display = task.checked || task.canceled ? "none" : "block";
+        checkbox.style.display = task.canceled ? "none" : "block";
+        deleteButton.style.display = task.canceled ? "none" : "block"
 
         if (task.id) {
             setAttr("readOnly", true, label, checkbox, cancelButton, modifyButton, deleteButton);
@@ -232,11 +246,9 @@ function renderNewTask(task) {
             alert("Can't remove a disabled task");
             return;
         }
-
-        taskDiv.remove();
+        deleteButtonImage.src = "/static/assets/loading.svg"
         if (task.id) {
             setAttr("readOnly", true, label, checkbox, cancelButton, modifyButton, deleteButton);
-
             deleteTaskRequest(task)
                 .then(() => {
                     setAttr("readOnly", false, label, checkbox, cancelButton, modifyButton, deleteButton);
@@ -250,33 +262,86 @@ function renderNewTask(task) {
                 alert("Can't save an empty task");
             return;
         }
+        modifyButtonImage.src = "/static/assets/verifier.svg";
 
         task.edit = !task.edit;
-        label.readOnly = !task.edit;
+        label.disabled = !task.edit;
         modifyButton.value = modifyButton.value == 'modify' ? 'save' : 'modify';
 
-        if (!task.edit) {
-            task.content = label.value;
-            if (task.id) {
-                console.log("updating");
-                setAttr("readOnly", true, checkbox, cancelButton, modifyButton, deleteButton);
-                updateTaskRequest(task)
-                    .then(() => {
-                        setAttr("readOnly", false, checkbox, cancelButton, modifyButton, deleteButton);
-                    });
-            }
-            else {
-                setAttr("readOnly", true, checkbox, cancelButton, modifyButton, deleteButton);
-
-                createTaskRequest(task)
-                    .then((response) => {
-                        task.id = response.id;
-                        setAttr("readOnly", false, checkbox, cancelButton, modifyButton, deleteButton);
-                        render()
-                    });
-            }
+        task.content = label.value;
+        if (task.id) {
+            modifyButtonImage.src = "/static/assets/loadinf.svg";
+            console.log("updating");
+            setAttr("readOnly", true, checkbox, cancelButton, modifyButton, deleteButton);
+            updateTaskRequest(task)
+                .then(() => {
+                    setAttr("readOnly", false, checkbox, cancelButton, modifyButton, deleteButton);
+                    modifyButtonImage.src = "/static/assets/crayon.svg";
+                });
         }
+
+
     });
 }
+
+function renderTaskInput() {
+
+    const taskDiv = document.createElement('div');
+
+    const label = document.createElement('input');
+    const discardButton = document.createElement('button');
+    const saveButton = document.createElement('button');
+
+    taskDiv.classList.add('task');
+    taskDiv.id = "t-0"
+
+    label.type = 'text';
+    label.placeholder = 'fill';
+
+    const discardButtonImage = document.createElement("img");
+    discardButtonImage.src = '/static/assets/corbeille-xmark.svg';
+    discardButton.appendChild(discardButtonImage)
+    discardButton.classList.add('delete-button');
+
+    const saveButtonImage = document.createElement("img");
+    saveButtonImage.src = '/static/assets/verifier.svg';
+    saveButton.appendChild(saveButtonImage)
+    saveButton.classList.add('modify-button');
+
+    taskDiv.append(label, saveButton, discardButton);
+    taskContainerDiv.appendChild(taskDiv);
+
+
+    discardButton.addEventListener('click', () => {
+        render();
+    });
+
+    saveButton.addEventListener('click', () => {
+        if (label.value == '') {
+            alert("Can't save an empty task");
+            return;
+        }
+        saveButtonImage.src = "/static/assets/loading.svg"
+
+        label.readOnly = true;
+        saveButton.value = saveButton.value == 'modify' ? 'save' : 'modify';
+        saveButton.disabled = true;
+        discardButton.disabled = true;
+        let constructTask = {
+            id: 0,
+            content: label.value,
+            checked: false,
+            canceled: false
+        }
+
+        createTaskRequest(constructTask)
+            .then((response) => {
+                constructTask.id = response.id;
+                saveButtonImage.src = "/static/assets/crayon.svg"
+            });
+
+    });
+}
+
 
 window.addEventListener("DOMContentLoaded", init)
