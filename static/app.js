@@ -38,7 +38,10 @@ async function init() {
             done: false,
             inEdit: true
         }
-        createTaskButton.addEventListener('click', () => renderNewTask(emptyTask, true));
+        createTaskButton.addEventListener('click', () => {
+            if (taskContainerDiv.querySelector("#t-0") === null)
+                renderNewTask(emptyTask, true)
+        });
         //remove loader
         setTimeout(() => {
             document.getElementById("loader").remove()
@@ -229,8 +232,7 @@ function renderNewTask(task, input) {
     const updateLocal = () => {
         taskList[taskList.findIndex(t => t.id === task.id)] = task
     }
-
-    editButton.addEventListener('click', async (e) => {
+    const saveContent = async (e)=>{
         e.preventDefault()
         if (labelContent.value == '') {
             alert("Can't save an empty task");
@@ -252,7 +254,11 @@ function renderNewTask(task, input) {
             render()
         }
         editButtonImage.src = "/static/assets/crayon.svg";
-    });
+    }
+    editButton.addEventListener('click', saveContent);
+    Container.addEventListener("keydown", (e)=>{
+        if (e.key === 'Enter') saveContent(e)
+    })
 
     if (!input) doneButton.addEventListener('change', async (e) => {
         e.preventDefault()
