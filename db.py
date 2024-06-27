@@ -4,205 +4,173 @@ from os.path import exists
 import secrets
 import hashlib
 
-data = 'data.db'
+DATABASE = "data.db"
 
-def connect():
-    return sqlite3.connect(data)
+class DB:
+    """
+    Context manager that automatically closes the cursor and database connection 
+    Return a cursor object upon entering.
+    """
+    def __init__(self):
+        self.conn = sqlite3.connect(DATABASE)
+    
+    def __enter__(self):
+        self.conn = self.conn.__enter__()
+        self.cursor = self.conn.cursor()
+        return self.cursor
+    
+    def __exit__(self, *exc_info):
+        self.cursor.close()
+        self.conn.commit()
+        self.conn.close()
 
 def init_db():
-    with open(data, 'w') as db:
+    with open(DATABASE, "w") as f:
         pass
-    conn = connect()
-    cursor = conn.cursor()
-    cursor.execute("""CREATE TABLE tasks (
+
+    with DB() as cursor:
+        cursor.execute("""CREATE TABLE tasks (
+                            id INTEGER PRIMARY KEY AUTOINCREMENT,
+                            content TEXT NOT NULL,
+                            checked INTEGER NOT NULL,
+                            canceled INTEGER NOT NULL,
+                            user_id INTEGER NOT NULL,
+                            FOREIGN KEY (user_id)
+                            REFERENCES user(id)
+                                ON DELETE CASCADE
+                        )""")
+        
+        cursor.execute("""CREATE TABLE users (
                         id INTEGER PRIMARY KEY AUTOINCREMENT,
-                        content TEXT NOT NULL,
-                        checked INTEGER NOT NULL,
-                        canceled INTEGER NOT NULL,
-                        user_id INTEGER NOT NULL,
-                        FOREIGN KEY (user_id)
-                        REFERENCES user(id)
-                            ON DELETE CASCADE
+                        username TEXT NOT NULL UNIQUE,
+                        password TEXT NOT NULL check(length(password) >= 6),
+                        token TEXT
                     )""")
-    
-    cursor.execute("""CREATE TABLE users (
-                       id INTEGER PRIMARY KEY AUTOINCREMENT,
-                       username TEXT NOT NULL UNIQUE,
-                       password TEXT NOT NULL check(length(password) >= 6),
-                       token TEXT
-                  )""")
-    
-    conn.commit()
-    conn.close()
-
-# creates database
-
-if not exists(data):
+ 
+# creates database if not existing
+if not exists(DATABASE):
     init_db()
 
 # -- AUTH --
 
-def generate_token():
+def generate_token() -> str:
     return secrets.token_urlsafe(16)
 
-def hash(password):
+def hash(password: str) -> str:
     h = hashlib.sha256()
     h.update(password.encode())
     return h.hexdigest()
 
-def username_exists(username):
-    conn = connect()
-    cursor = conn.cursor()
+# check if username already used
+def username_exists(username: str) -> bool:
+    with DB() as cursor:
+        cursor.execute("SELECT id FROM users WHERE username = ?", (username,))
+        return bool(cursor.fetchone())
 
-    cursor.execute("SELECT id FROM users WHERE username = ?", (username,))
-    if cursor.fetchone():
-        res = True
-    else:
-        res = False
+# check if username and password are those of a user
+def valid_credentials(username: str, password: str) -> bool:
+    if not username: # the users signed in with google haven't passwords
+        return False
+    with DB() as cursor:
+        cursor.execute("SELECT id FROM users WHERE username = ? AND password = ?", (username, hash(password)))
+        return bool(cursor.fetchone())
 
-    conn.close()
-    return res
-
-
-def valid_user_password(username, password):
-    conn = connect()
-    cursor = conn.cursor()
-    
-    cursor.execute("SELECT id FROM users WHERE username = ? AND password = ?", (username, hash(password)))
-    res = cursor.fetchone()
-
-    conn.close()
-    return bool(res)
-
-def valid_user_token(username, token):
-    conn = connect()
-    cursor = conn.cursor()
-
+# check if username and token are those of a user
+def valid_connection(username: str, token: str) -> bool:
     if not(username and token):
         return False
-    cursor.execute("SELECT id FROM users WHERE username = ? and token = ?", (username, token))
-    if cursor.fetchone():
-        return True
-    else:
-        return False
+
+    with DB() as cursor:
+        cursor.execute("SELECT id FROM users WHERE username = ? and token = ?", (username, token))
+        return bool(cursor.fetchone())
 
 def signin_user(username, password):
-    conn = connect()
-    cursor = conn.cursor()
-
-
+    # verify credentials
     if username_exists(username):
-        response = None
-    else:
+        return "username already used"
+
+    with DB() as cursor:
         password = hash(password)
         cursor.execute("INSERT INTO users (username, password) VALUES(?,?)", (username, password))
 
         token = generate_token()
         cursor.execute("UPDATE users SET token = ? WHERE username = ? AND password = ?", (token, username, password))
-
-        response = token 
-
-    conn.commit()
-    conn.close()
-    return response
+        return token
 
 def login_user(username, password):
-    #TODO: Add provider type to bypass password verification
-    conn = connect()
-    cursor = conn.cursor()
+    # verify credentials
+    if not valid_credentials(username, password):
+        return "invalid credentials"
+ 
+    with DB() as cursor:
+        password = hash(password)
 
-    if not valid_user_password(username, password):
-        return None 
-    
-    password = hash(password)
-
-    token = generate_token()
-    cursor.execute("UPDATE users SET token = ? WHERE username = ? AND password = ?", (token, username, password))
-
-    conn.commit()
-    conn.close()
-    return token
+        token = generate_token()
+        cursor.execute("UPDATE users SET token = ? WHERE username = ? AND password = ?", (token, username, password))
+        return token
 
 def logout_user(username, token):
-    conn = connect()
-    cursor = conn.cursor()
+    # verify connection
+    if not valid_connection(username, token):
+        return "invalid connection"
 
-
-    if not valid_user_token(username, token):
-        return None
-
-    cursor.execute("UPDATE users SET token = NULL WHERE username = ? AND token = ?", (username, token))
-    res = bool(cursor.rowcount)
-
-    conn.commit()
-    conn.close()
-    return res
+    with DB() as cursor:
+        cursor.execute("UPDATE users SET token = NULL WHERE username = ?", (username))
+        return bool(cursor.rowcount)
 
 # -- TASKS --
 
 def update_task(username,token,task):
-    conn = connect()
-    cursor = conn.cursor()
+    # verify connection
+    if not valid_connection(username,token):
+        return "invalid connection"
 
-    if not valid_user_token(username,token):
-        return "user not found error"
+    with DB() as cursor:
+        # if task hasn't any id then we don't do anything
+        if not task[0]:
+            return
 
-    if task[0]:
-        cursor.execute("UPDATE tasks SET content = ?, checked = ?, canceled = ? WHERE id = ? AND user_id = (SELECT id FROM users WHERE username = ? AND token = ?)", (task[1], task[2], task[3], task[0],username,token))
-        conn.commit()
-    
-    conn.close()
+        cursor.execute(
+            "UPDATE tasks SET content = ?, checked = ?, canceled = ? WHERE id = ? AND user_id = (SELECT id FROM users WHERE username = ?)",
+            (task[1], task[2], task[3], task[0], username))
 
 def create_task(username,token,task):
-    conn = connect()
-    cursor = conn.cursor()
+    # verify connection
+    if not valid_connection(username, token):
+        return "invalid connection"
 
-    if not valid_user_token(username,token):
-        return "user not found error"
-
-    try:
-        task[0] = int(task[0])
-    except:
+    # checks if the id of the task is a digit equal to 0
+    # comment: this is useless for the functionment of the app itself
+    # though it can prevent "a little bit" from hackers
+    if task[0] != "0":
         return "bad request"
-    if task[0] == 0:
-        cursor.execute("INSERT INTO tasks (content, checked, canceled, user_id) VALUES (?,?,?, (SELECT id FROM users WHERE username = ? AND token = ?))", (task[1], task[2], task[3], username, token))
-        id = cursor.lastrowid
-        conn.commit()
-    else:
-        id = 0
 
-    conn.close()
-    return id
+    with DB() as cursor:
+        cursor.execute(
+            "INSERT INTO tasks (content, checked, canceled, user_id) VALUES (?,?,?, (SELECT id FROM users WHERE username = ?))",
+            (task[1], task[2], task[3], username))
+        return bool(cursor.rowcount)
 
-def get_tasks (username,token):
-    # establish connection with db
-    conn = connect()
-    cursor = conn.cursor()
-
-    if not valid_user_token(username,token):
-        return "user not found error"
-
-    # make request
-    cursor.execute("SELECT id, content, checked, canceled FROM tasks WHERE user_id = (SELECT id FROM users WHERE username = ? and token = ? ) ORDER BY id ASC",(username,token))
-    response = cursor.fetchall()
-
-    conn.close()
-    return response
+def get_tasks(username,token):
+    # verify connection
+    if not valid_connection(username,token):
+        return "invalid connection"
+    
+    # send tasks
+    with DB() as cursor:
+        cursor.execute(
+            "SELECT id, content, checked, canceled FROM tasks WHERE user_id = (SELECT id FROM users WHERE username = ?) ORDER BY id ASC",
+            (username,))
+        return cursor.fetchall()
 
 def delete_task (username,token,task):
-    # establish connection with db
-    conn = connect()
-    cursor = conn.cursor()
-
-    if not valid_user_token(username,token):
-        return "user not found error"
-
-    # make request
-    cursor.execute("DELETE FROM tasks WHERE id=? AND user_id = (SELECT id FROM users WHERE username = ? and token = ?)", (task[0],username,token))
-
-    res = bool(cursor.rowcount)
-
-    conn.commit()
-    conn.close()
-
-    return res
+    # verify connection
+    if not valid_connection(username,token):
+        return "invalid connection"
+    
+    # delete task
+    with DB() as cursor:
+        cursor.execute(
+            "DELETE FROM tasks WHERE id=? AND user_id = (SELECT id FROM users WHERE username = ?)",
+            (task[0],username))
+        return bool(cursor.rowcount)

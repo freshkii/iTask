@@ -1,17 +1,10 @@
-from flask import Blueprint, render_template,  redirect, url_for, request
-import json
+from flask import Blueprint, render_template, request, redirect
 
-from google.oauth2.credentials import Credentials
-from google_auth_oauthlib.flow import Flow
-from google.auth.transport.requests import Request
+import json
+import traceback
 
 from db import *
-
-
-
-flow = Flow.from_client_secrets_file("client_secrets.json", scopes=['https://www.googleapis.com/auth/userinfo.profile'])
-
-flow.redirect_uri = "http://127.0.0.1/oauth"
+from logs import *
 
 root = Blueprint("/", __name__, static_folder="static", template_folder="templates")
 
@@ -27,153 +20,256 @@ def application():
 
 @root.route("/login")
 def login():
-    return render_template("auth.html", operation='login')
+    return render_template("auth.html", operation="login")
 
 @root.route("/sign-in")
 def signin():
     return render_template("auth.html", operation="sign-in")
 
+"""
+this function is used for request with json content
+checks the validity of:
+    - the request content-type
+    - the presence of the params (username, password, token, ...)
+yes ?
+    -> write in the d dict for each params
+        key: param (param)
+        value: associated request content (request.json[param])
+
+output:
+    - error status code (invalid) or True (valid)
+"""
+def request_valid(request, params: list[str], d: dict[str]):
+    try:
+        data = request.json
+    except:
+        return 415
+    try:
+        for param in params:
+            d[param] = data[param]
+    except:
+        return 401
+
+"""
+Structure of functions below
+"""
+
+# -- AUTH --
+
 auth = Blueprint("auth", __name__, static_folder="static", template_folder="templates")
 
 @auth.route("/sign-in", methods=["POST"])
 def signin_api():
+    d = {}
     try:
-        data = request.json
-        username = data["username"]
-        password = data["password"]
-    except:
-        return json.dumps("failure"), 400
-    
-    try:
-        response = signin_user(username, password)
-        if response:
-            return json.dumps({'token': response}), 200
+        # verify validity
+        response = request_valid(request, ["username", "password"], d)
+        if response is int: # -> error status code
+            return "failure", response # ~ status code
+
+        # handle request
+        response = signin_user(d["username"], d["password"])
+        if response == "username already used":
+            return json.dumps("username already used")
         else:
-            return json.dumps("failure"), 400
-    except Exception as e:
-        print(e)
+            return json.dumps({"token": response}) # 200
+    except:
+        add_log({
+            "error_type": "500",
+            "log": traceback.format_exc()
+        })
         return json.dumps("failure"), 500
 
 @auth.route("/login", methods=["POST"])
 def login_api():
-    #TODO: Add provider type to bypass password verification
+    d = {}
     try:
-        data = request.json
-    except:
-        return json.dumps("failure"), 400
+        # verify request validity
+        response = request_valid(request, ["username", "password"], d)
+        if response is int: # -> error status code
+            return "failure", response # ~ status code
+        global username, password
 
-    try:
-        response = login_user(data["username"], data["password"])
-        if response:
-            return json.dumps({'token':response}), 200
+        # handle request
+        response = login_user(username, password)
+        if response == "invalid credentials":
+            add_log({
+                "error_type": "400",
+                "log": f"{request.remote_addr} attempted to connect with username: {username} and password: {password}"
+                })
+            return json.dumps("failure"), 401
         else:
-            return json.dumps("failure"), 400
-    except Exception as e:
-        print(e)
-        return json.dumps("failure db"), 401
+            return json.dumps({"token":response}) # 200
+    except:
+        add_log({
+            "error_type": "500",
+            "log": traceback.format_exc()
+        })
+        return json.dumps("failure"), 500
 
 @auth.route("/logout", methods=["POST"])
 def logout_api():
+    d = {}
     try:
-        data = request.json
-    except:
-        return json.dumps("failure"), 400
+        # verify request validity
+        response = request_valid(request, ["username", "token"], d)
+        if response is int: # -> error status code
+            return "failure", response # ~ status code
+        global username, token
 
-    res = logout_user(data["username"], data["token"])
-    if res:
-        return json.dumps("success")
-    else:
-        return json.dumps("failure db"), 401
+        # handle request
+        response = logout_user(d.username, d.token)
+        if response == "invalid connection":
+            add_log({
+                "error_type": "401",
+                "log": f"{request.remote_addr} attempted to logout with username: {d["username"]} and token: {d["token"]}"
+                })
+            return json.dumps("failure"), 401
+        else:
+            return json.dumps("success") # 200
+    except:
+        add_log({
+            "error_type": "500",
+            "log": traceback.format_exc()
+        })
+        return json.dumps("failure"), 500
 
 @auth.route("/getuser", methods=["POST"])
 def getuser_api():
+    d = {}
     try:
-        data = request.json
-    except:
-        return json.dumps("failure"), 400
+        # verify request validity
+        response = request_valid(request, ["username"], d)
+        if response is int: # -> error status code
+            return "failure", response # ~ status code
+        global username
     
-    try:
-        response = username_exists(data["username"])
+        # handle request
+        response = username_exists(d["username"])
         return json.dumps(response)
     except:
-        return json.dumps("failure"), 400
+        add_log({
+            "error_type": "500",
+            "log": traceback.format_exc()
+        })
+        return json.dumps("failure"), 500
 
 @auth.route("/valid-session", methods=["POST"])
 def validsession_api():
+    d = {}
     try:
-        data = request.json
-    except:
-        return json.dumps("failure"), 400
-    
-    try:
-        response = valid_user_token(data["username"], data["token"])
-        if response: 
-            return json.dumps(True)
-        else:
-            return json.dumps(False)
-    except:
-        return json.dumps("failure"), 400
-        
+        # verify request validity
+        response = request_valid(request, ["username", "token"], d)
+        if response is int: # -> error status code
+            return "failure", response # ~ status code
+        global username,  token
 
+        # handle request
+        response = valid_connection(d["username"], d["token"])
+        return json.dumps(response)
+    except:
+        add_log({
+            "error_type": "500",
+            "log": traceback.format_exc()
+        })
+        return json.dumps("failure"), 500
+
+# -- TASK --
 
 task = Blueprint("task", __name__, static_folder="static", template_folder="templates")
 
 @task.route("/read") # methods=["GET"]
 def read():
-    if not request.args:
-        return json.dumps("error no args")
+    d = {}
     try:
-        tasks = get_tasks(request.args.get("username"), request.args.get("token"))
-        return json.dumps(tasks)
-    except Exception as e:
-        print(e)
-        return json.dumps("error args")
+        # verify if request got args
+        if not request.args:
+            return json.dumps("failure"), 415
+        
+        try:
+            username = request.args["username"]
+            token = request.args["token"]
+        except:
+            return json.dumps("failure"), 400
+        
+        # handle request
+        tasks = get_tasks(username, token)
+        print(tasks)
+        if tasks == "invalid connection":
+            return json.dumps("failure"), 401
+        else:
+            return json.dumps(tasks) 
+    except:
+        add_log({
+            "error_type": "500",
+            "log": traceback.format_exc()
+        })
+        return json.dumps("failure"), 500
 
 @task.route("/create", methods=["POST"])
 def create():
+    d = {}
     try:
-        data = request.json
-    except:
-        return json.dumps("request must be json")
-    
-    if not valid_user_token(data.get('username'), data.get("token")):
-        return json.dumps("invalid json")
-    
-    id = create_task(data.get("username"), data.get("token"), data.get("task"))
+        response = request_valid(request, ["username", "token", "task"], d)
+        if response is int: # -> error status code
+            return "failure", response # ~ status code
+        global username, token, task
 
-    if id == "user not found error":
-        return json.dumps("failure")
-    else:
-        return json.dumps({"id":id})
+        #  handle request
+        response = create_task(d["username"], d["token"], d["task"])
+        if response == "invalid connection":
+            return json.dumps("failure"), 401
+        elif response == "bad request":
+            return json.dumps("failure"), 400
+        else:
+            return json.dumps({"id":id})
+    except:
+        add_log({
+            "error_type": "500",
+            "log": traceback.format_exc()
+        })
+        return json.dumps("failure"), 500
 
 @task.route("/update", methods=["PUT"])
 def update():
+    d = {}
     try:
-        data = request.json
+        response = request_valid(request, ["username", "token", "task"], d)
+        if response is int: # -> error status code
+            return "failure", response # ~ status code
+        global username, token, task
+    
+        # handle request
+        id = update_task(d["username"], d["token"], d["task"])
+        if id == "invalid connection":
+            return json.dumps("failure"), 401
+        else:
+            return json.dumps({"id":id})
     except:
-        return json.dumps("request must be json")
-    
-    if not valid_user_token(data.get("username"), data.get("token")):
-        return json.dumps("invalid json")
-    
-    id = update_task(data.get("username"), data.get("token"), data.get("task"))
+        add_log({
+            "error_type": "500",
+            "log": traceback.format_exc()
+        })
+        return json.dumps("failure"), 500
 
-    if id == "user not found error":
-        return json.dumps("failure")
-    else:
-        return json.dumps({"id":id})
 
-@task.route('/delete', methods=['DELETE'])
+@task.route("/delete", methods=["DELETE"])
 def delete():
+    d = {}
     try:
-        data = request.json
+        response = request_valid(request, ["username", "token", "taks"], d)
+        if response is int: # -> error status code
+            return "failure", response # ~ status code
+        global username, token, task
+    
+        # handle request
+        if delete_task(d["username"], d["token"], d["task"]) == "invalid connection":
+            return json.dumps("failure"), 401
+        else:
+            return json.dumps("success") # 200
     except:
-        return json.dumps('request must be json')
-    
-    if not valid_user_token(data.get('username'), data.get('token')):
-        return json.dumps('invalid json')
-    
-    if delete_task(data.get('username'), data.get('token'), data.get('task')):
-        return json.dumps("success")
-    else:
-        return json.dumps("failure")
+        add_log({
+            "error_type": "500",
+            "log": traceback.format_exc()
+        })
+        return json.dumps("failure"), 500

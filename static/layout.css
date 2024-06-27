@@ -1,3 +1,11 @@
+:root {
+    --primary: #2997ff;
+    --secondary: #0071e3;
+    --background-primary: #FFF;
+    --background-secondary: hsl(240, 11%, 98%);
+    --text-primary: black;
+}
+
 * {
     font-family: "Ubuntu";
     margin: 0;
@@ -12,9 +20,10 @@ html {
 
 body {
     height: 100%;
-    overflow-x: hidden;
+    overflow: hidden;
     display: flex;
     flex-direction: column;
+    background-color: var(--background-primary);
 }
 
 header {
@@ -23,13 +32,13 @@ header {
     align-items: center;
     width: 100%;
     padding: 3px 0;
-    border-bottom: 1px solid black;
-    background-color: rgb(241, 241, 241);
+    border-bottom: 1px solid rgb(236, 236, 236);
+    background-color: var(--background-secondary);
     position: relative;
 }
 
 header #Title {
-    color: black;
+    color: var(--text-primary);
     margin: 5px;
     display: flex;
     text-decoration: none;
@@ -39,6 +48,14 @@ header .buttons-container {
     display: flex;
     position: absolute;
     right: 10px;
+}
+
+header .buttons-container #header-loader {
+    position: absolute;
+    width: 100%;
+    height: 100%;
+    background-color: var(--background-secondary);
+    justify-content: center;
 }
 
 header .buttons-container div {
@@ -54,6 +71,7 @@ main {
     align-items: center;
     justify-content: center;
     position: relative;
+    padding: 20px 10vw;
 }
 
 
@@ -70,7 +88,7 @@ input[type='submit'],
     border-radius: 10px;
     cursor: pointer;
     transition: all 0.3s ease-in-out;
-    color: black;
+    color: var(--text-primary);
     font-weight: 500;
     text-decoration: none;
 }
@@ -95,7 +113,7 @@ button.primary,
 input[type='button'].primary,
 input[type='submit'].primary,
 .button.primary {
-    background-color: #2997ff;
+    background-color: var(--primary);
     color: white;
 }
 
@@ -103,7 +121,7 @@ button.primary:hover,
 input[type='button'].primary:hover,
 input[type='submit'].primary:hover,
 .button.primary:hover {
-    background-color: #0071e3;
+    background-color: var(--secondary);
 }
 
 button.primary:focus,
@@ -119,8 +137,7 @@ input[type='submit'].primary:focus,
 button.danger,
 input[type='button'].danger,
 input[type='submit'].danger,
-.button.danger {
-}
+.button.danger {}
 
 button.danger:hover,
 input[type='button'].danger:hover,
@@ -137,6 +154,10 @@ input[type='submit'].danger:focus,
 }
 
 /* text input */
+input[type="text"]:not(:disabled),
+input[type="password"]:not(:disabled) {
+    background-color: hsl(240, 2%, 98%);
+}
 
 input[type="text"],
 input[type="password"] {
@@ -148,12 +169,13 @@ input[type="password"] {
 }
 
 footer {
-    background-color: rgb(220, 230, 244);
+    background-color: var(--background-secondary);
+    border-top: 1px solid rgb(236, 236, 236);
     display: flex;
     justify-content: center;
     align-items: center;
     width: 100%;
-    height: 10%;
+    padding: 5px 0;
 }
 
 @keyframes fade_in {

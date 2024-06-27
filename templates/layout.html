@@ -7,8 +7,6 @@
     <title>iTasks{% block title %}{% endblock title %}</title>
     <link rel="stylesheet" href="{{ url_for('static', filename='layout.css')}}">
     {% block styles %} {% endblock styles %}
-    <link rel="preconnect" href="https://fonts.googleapis.com">
-    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link
         href="https://fonts.googleapis.com/css2?family=Ubuntu:ital,wght@0,300;0,400;0,500;0,700;1,300;1,400;1,500;1,700&display=swap"
         rel="stylesheet">
@@ -16,13 +14,15 @@
     <script src="{{url_for('static', filename='auth.js')}}"></script>
     {% block scripts %} {% endblock scripts %}
 </head>
-
 <body>
     <header>
         <a href="/" id="Title">
             <h1>iTasks</h1>
         </a>
         <div class="buttons-container">
+            <div id="header-loader">
+                <img src="{{ url_for('static', filename='assets/loading.svg')}}">
+            </div>
             <div id="as-not-logged">
                 <a class="button" href="/sign-in">Sign in</a>
                 <a class="button primary" href="/login">Login</a>

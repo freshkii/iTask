@@ -10,11 +10,10 @@ styles %}
 <body>
 <h1>{% if operation == 'login' %}Login{% else %}Sign-in{% endif %}</h1>
 {% if operation == 'login' %}
-<form id="form" onsubmit="trylogin(); return false;">
+<form id="form" class="form-container" onsubmit="trylogin(); return false;">
   {% else%}
-  <form id="form" onsubmit="trySignIn(); return false;">
+  <form id="form" class="form-container" onsubmit="trySignIn(); return false;">
     {% endif %}
-    <div class="form-container">
       <div class="input-container">
         <input type="text" name="username" required />
         <label for="username" class="input-label">Username</label>
@@ -42,7 +41,6 @@ styles %}
           Connect with Google
         </button>
       </div>
-    </div>
   </form>
 
   {% endblock content %}
