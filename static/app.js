@@ -38,10 +38,17 @@ async function init() {
             done: false,
             inEdit: true
         }
+
         createTaskButton.addEventListener('click', () => {
-            if (taskContainerDiv.querySelector("#t-0") === null)
-                renderNewTask(emptyTask, true)
+            if (taskContainerDiv.querySelector("#t-0") === null) renderNewTask(emptyTask, true)
         });
+        document.addEventListener("keydown", (e) => {
+            if (e.key === "t" && taskContainerDiv.querySelector("#t-0") === null) {
+                e.preventDefault();
+                renderNewTask(emptyTask, true)
+            }
+
+        })
         //remove loader
         setTimeout(() => {
             document.getElementById("loader").remove()
@@ -121,7 +128,7 @@ function render() {
     for (var i = 0; i < children.length; i++) {
         var child = children[i];
         if (taskList.findIndex(t => t.id === Number.parseInt(child.id.slice(2))) === -1) {
-            console.info("Removing task " + child.id);
+            if (child.id !== "t-0") console.info("Removing task " + child.id);
             child.remove();
         }
     }
@@ -232,7 +239,7 @@ function renderNewTask(task, input) {
     const updateLocal = () => {
         taskList[taskList.findIndex(t => t.id === task.id)] = task
     }
-    const saveContent = async (e)=>{
+    const saveContent = async (e) => {
         e.preventDefault()
         if (labelContent.value == '') {
             alert("Can't save an empty task");
@@ -256,7 +263,7 @@ function renderNewTask(task, input) {
         editButtonImage.src = "/static/assets/crayon.svg";
     }
     editButton.addEventListener('click', saveContent);
-    Container.addEventListener("keydown", (e)=>{
+    Container.addEventListener("keydown", (e) => {
         if (e.key === 'Enter') saveContent(e)
     })
 
@@ -322,6 +329,8 @@ function renderNewTask(task, input) {
             render()
         } else await deleteTaskRequest(task)
     });
+
+    if (input) labelContent.focus();
 
 }
 window.addEventListener("DOMContentLoaded", init)

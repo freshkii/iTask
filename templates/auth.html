@@ -8,7 +8,7 @@ styles %}
 ></script>
 {% endblock scripts %} {% block content %}
 <body>
-<h1>{% if operation == 'login' %}Login{% else %}Sign-in{% endif %}</h1>
+<h1 class="title">{% if operation == 'login' %}Login{% else %}Sign-in{% endif %}</h1>
 {% if operation == 'login' %}
 <form id="form" class="form-container" onsubmit="trylogin(); return false;">
   {% else%}
