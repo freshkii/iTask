@@ -4,7 +4,7 @@
 ✨ Discover the next generation tasking tool for enterprises and personal use.
 
 
-![App preview](/.erb/assets/image.png)
+![App preview](./.erb/assets/demo.png)
 
 
 ## Features
