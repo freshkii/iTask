@@ -11,37 +11,40 @@ styles %}
 <h1>{% if operation == 'login' %}Login{% else %}Sign-in{% endif %}</h1>
 {% if operation == 'login' %}
 <form id="form" class="form-container" onsubmit="trylogin(); return false;">
-  {% else%}
-  <form id="form" class="form-container" onsubmit="trySignIn(); return false;">
-    {% endif %}
-      <div class="input-container">
-        <input type="text" name="username" required />
-        <label for="username" class="input-label">Username</label>
-      </div>
-      <div class="input-container">
-        <input type="password" name="password" minlength="6" required />
-        <label for="password" class="input-label">Password</label>
-      </div>
-        <div class="google-container">
-            <input
-            class="button primary"
-            type="submit"
-            value="{% if operation == 'login' %}Login{% else%} Sign in {% endif %}"
-            name="submit"
-            id="{% if operation == 'login'%}'loginbutton'{%else%} 'signinbutton' {% endif %}"
-             />
-            </div>
-            <button type="button" id="firebase-sign-in">
-              <img
-                  src="https://www.pngall.com/wp-content/uploads/5/Google-G-Logo-PNG-Image.png"
-                  class="google-logo"
-                  width=""
-                  height="20"
-               />
-          Connect with Google
-        </button>
-      </div>
-  </form>
+{% else%}
+<form id="form" class="form-container" onsubmit="trySignIn(); return false;">
+{% endif %}
+  <div class="input-container">
+    <input type="text" name="username" required />
+    <label for="username" class="input-label">Username</label>
+  </div>
+  <div class="input-container">
+    <input type="password" name="password" minlength="6" required />
+    <label for="password" class="input-label">Password</label>
+  </div>
+    <div class="google-container">
+        <input
+        class="button primary"
+        type="submit"
+        value="{% if operation == 'login' %}Login{% else%} Sign in {% endif %}"
+        name="submit"
+        id="{% if operation == 'login'%}'loginbutton'{%else%} 'signinbutton' {% endif %}"
+          />
+        </div>
+        <button type="button" id="firebase-sign-in">
+          <img
+              src="https://www.pngall.com/wp-content/uploads/5/Google-G-Logo-PNG-Image.png"
+              class="google-logo"
+              width=""
+              height="20"
+            />
+      Connect with Google
+    </button>
+  </div>
+</form>
+{% if operation == "login" %}
+  <p>New to iTask ? <a href="/sign-in">Create an account</a></p>
+{% endif %}
 
   {% endblock content %}
 </form>

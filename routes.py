@@ -88,14 +88,13 @@ def login_api():
         response = request_valid(request, ["username", "password"], d)
         if response is int: # -> error status code
             return "failure", response # ~ status code
-        global username, password
 
         # handle request
-        response = login_user(username, password)
+        response = login_user(d["username"], d["password"])
         if response == "invalid credentials":
             add_log({
                 "error_type": "400",
-                "log": f"{request.remote_addr} attempted to connect with username: {username} and password: {password}"
+                "log": f"{request.remote_addr} attempted to connect with username: {d["username"]} and password: {d["password"]}"
                 })
             return json.dumps("failure"), 401
         else:
@@ -115,10 +114,9 @@ def logout_api():
         response = request_valid(request, ["username", "token"], d)
         if response is int: # -> error status code
             return "failure", response # ~ status code
-        global username, token
 
         # handle request
-        response = logout_user(d.username, d.token)
+        response = logout_user(d["username"], d["token"])
         if response == "invalid connection":
             add_log({
                 "error_type": "401",
@@ -142,7 +140,6 @@ def getuser_api():
         response = request_valid(request, ["username"], d)
         if response is int: # -> error status code
             return "failure", response # ~ status code
-        global username
     
         # handle request
         response = username_exists(d["username"])
@@ -162,7 +159,6 @@ def validsession_api():
         response = request_valid(request, ["username", "token"], d)
         if response is int: # -> error status code
             return "failure", response # ~ status code
-        global username,  token
 
         # handle request
         response = valid_connection(d["username"], d["token"])
@@ -180,7 +176,6 @@ task = Blueprint("task", __name__, static_folder="static", template_folder="temp
 
 @task.route("/read") # methods=["GET"]
 def read():
-    d = {}
     try:
         # verify if request got args
         if not request.args:
@@ -194,7 +189,6 @@ def read():
         
         # handle request
         tasks = get_tasks(username, token)
-        print(tasks)
         if tasks == "invalid connection":
             return json.dumps("failure"), 401
         else:
@@ -213,7 +207,6 @@ def create():
         response = request_valid(request, ["username", "token", "task"], d)
         if response is int: # -> error status code
             return "failure", response # ~ status code
-        global username, token, task
 
         #  handle request
         response = create_task(d["username"], d["token"], d["task"])
@@ -222,7 +215,7 @@ def create():
         elif response == "bad request":
             return json.dumps("failure"), 400
         else:
-            return json.dumps({"id":id})
+            return json.dumps({"id":response})
     except:
         add_log({
             "error_type": "500",
@@ -237,7 +230,6 @@ def update():
         response = request_valid(request, ["username", "token", "task"], d)
         if response is int: # -> error status code
             return "failure", response # ~ status code
-        global username, token, task
     
         # handle request
         id = update_task(d["username"], d["token"], d["task"])
@@ -260,7 +252,6 @@ def delete():
         response = request_valid(request, ["username", "token", "taks"], d)
         if response is int: # -> error status code
             return "failure", response # ~ status code
-        global username, token, task
     
         # handle request
         if delete_task(d["username"], d["token"], d["task"]) == "invalid connection":

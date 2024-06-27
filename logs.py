@@ -18,7 +18,7 @@ def add_log(log: str):
 
 def save_logs():
     with open("logs.json") as f:
-        content = json.load(f)
+        content = {} if len(json.readlines()) else json.load(f)
         content[init_date] = logs
     
     with open("logs.json", "w") as f:

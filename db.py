@@ -115,7 +115,7 @@ def logout_user(username, token):
         return "invalid connection"
 
     with DB() as cursor:
-        cursor.execute("UPDATE users SET token = NULL WHERE username = ?", (username))
+        cursor.execute("UPDATE users SET token = NULL WHERE username = ?", (username, ))
         return bool(cursor.rowcount)
 
 # -- TASKS --
@@ -142,14 +142,14 @@ def create_task(username,token,task):
     # checks if the id of the task is a digit equal to 0
     # comment: this is useless for the functionment of the app itself
     # though it can prevent "a little bit" from hackers
-    if task[0] != "0":
+    if task[0] != 0:
         return "bad request"
 
     with DB() as cursor:
         cursor.execute(
             "INSERT INTO tasks (content, checked, canceled, user_id) VALUES (?,?,?, (SELECT id FROM users WHERE username = ?))",
             (task[1], task[2], task[3], username))
-        return bool(cursor.rowcount)
+        return cursor.lastrowid
 
 def get_tasks(username,token):
     # verify connection

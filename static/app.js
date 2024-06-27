@@ -20,7 +20,7 @@ async function init() {
     })
     if (!isAuthorized) {
         console.warn("UnauthorizedError: User not logged");
-        window.location.assign("/");
+        window.location.assign("/login");
     }
     else {
         //get tasks
@@ -51,8 +51,10 @@ async function init() {
 }
 
 function ToInternalTask(arrayTask) {
+    console.log(arrayTask[0])
     return { id: arrayTask[0], content: arrayTask[1], done: arrayTask[2] === 1, locked: arrayTask[3] === 1, inEdit: false };
 }
+
 function ToArraytask(internalTask) {
     return [internalTask.id, internalTask.content, internalTask.done, internalTask.locked];
 }

@@ -7,8 +7,44 @@
 {% endblock styles %}
 
 {% block content %}
-<a href="/app">
-    <button>Start tasking</button>
-</a>
-<p></p>
+
+<div class="main-content">
+    <div id="intro" class="intro_section">
+    <div class="bg"></div>
+    <div class="bg bg2"></div>
+    <div class="bg bg3"></div>
+    <p>Manage Your</p>
+    <p>Life In</p>
+    <p>One Click</p>
+    <a href="/app">
+        <button><div>Start tasking</div></button>
+    </a>
+    </div>
+    <div id="section1" class="full-size-section">Why iTask</div>
+    <div id="section2" class="frequent_container">
+    <p>Frequently asked questions</p>
+    <div class="questionContainer">
+        <details id="details">
+        <summary>What is iTask ?</summary>
+        <p>
+            iTask is a tool recommended for everyone, it allows you to
+            organise everything at one place.
+        </p>
+        </details>
+        <details id="details">
+        <summary>jsp</summary>
+        caca
+        </details>
+        <details id="details">
+        <summary></summary>
+        pipi
+        </details>
+    </div>
+    </div>
+    <div id="section3" class="full-size-section">Section 3 Content</div>
+</div>
 {% endblock content %}
+
+{% block scripts %}
+<script src="{{ url_for('static', filename='home.js')}}"></script>
+{% endblock scripts %}

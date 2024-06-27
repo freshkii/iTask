@@ -1,10 +1,8 @@
-<<<<<<< HEAD
-.provider-container {
-  margin-top: 3vh;
+body {
+  overflow: hidden;
+  scroll-behavior: none;
 }
 
-=======
->>>>>>> 7416897adeaae7d65219f0337a05e493ddce8e9c
 #form {
   display: flex;
   align-items: center;
