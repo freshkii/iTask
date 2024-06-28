@@ -195,6 +195,8 @@ function render() {
         if (editButtonIcon === null) throw new Error("Cannot resolve component " + "Edit button Icon" + " in element " + elementId)
         const lockButton = element.querySelector('.lock-button');
         if (lockButton === null) throw new Error("Cannot resolve component " + "Lock button" + " in element " + elementId)
+        const lockButtonIcon = lockButton.querySelector('img');
+        if (lockButtonIcon === null) throw new Error("Cannot resolve component " + "Lock button Icon" + " in element " + elementId)
         const deleteButton = element.querySelector('.delete-button');
         if (deleteButton === null) throw new Error("Cannot resolve component " + "Delete button" + " in element " + elementId)
         const deleteButtonIcon = deleteButton.querySelector("img");
@@ -215,9 +217,10 @@ function render() {
         if (editButton.style.display !== t.done || t.locked ? "none" : "block") editButton.style.display = t.done || t.locked ? "none" : "block"
         if (editButton.disabled !== t.done || t.locked) editButton.disabled = t.done || t.locked
         //  Lock button
-        if (lockButton.value !== t.locked ? 'Unlock' : 'Lock') lockButton.value = t.locked ? 'Unlock' : 'Lock';
+        if (lockButtonIcon.src !== t.locked ? '/static/assets/bloquer.svg' : "/static/assets/verrouiller-ouvert-alt.svg") lockButtonIcon.src = t.locked ? '/static/assets/bloquer.svg' : "/static/assets/verrouiller-ouvert-alt.svg" 
         if (lockButton.style.display !== t.done ? "none" : "block") lockButton.style.display = t.done ? "none" : "block";
         if (lockButton.disabled !== t.done) lockButton.disabled = t.done;
+
         //  Delete button
         if (deleteButton.style.display !== t.locked ? "none" : "block") deleteButton.style.display = t.locked ? "none" : "block";
         if (deleteButton.disabled !== t.locked) deleteButton.disabled = t.locked
@@ -252,15 +255,16 @@ function _renderTask(task, input) {
 
     const editButton = document.createElement('button');
     const editButtonImage = document.createElement("img");
-    editButtonImage.src = task.inEdit ? '/static/assets/verifier.svg' : "/static/assets/crayon.svg";
     editButton.appendChild(editButtonImage);
 
     editButton.classList.add("edit-button")
     Container.appendChild(editButton);
-    const lockButton = document.createElement('input');
+    const lockButton = document.createElement('button');
+    const lockButtonImage = document.createElement("img");
     if (!input) {
         lockButton.type = 'button';
         lockButton.classList.add('lock-button');
+        lockButton.appendChild(lockButtonImage);
         Container.appendChild(lockButton);
     }
 
@@ -271,6 +275,7 @@ function _renderTask(task, input) {
     deleteButton.appendChild(deleteButtonImage)
 
     deleteButton.classList.add('delete-button');
+    deleteButton.classList.add("danger")
     Container.appendChild(deleteButton);
 
     taskContainerDiv.appendChild(Container);

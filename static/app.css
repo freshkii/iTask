@@ -41,7 +41,7 @@ main {
     overflow-y: auto;
     scrollbar-width: thin;
     flex-grow: 1;
-    max-height: 72.1svh;
+    max-height: 70svh;
     width: 100%;
 }
 
@@ -49,7 +49,7 @@ main {
     display: flex;
     justify-content: center;
     align-content: space-around;
-    gap: 10px;
+    gap: 5px;
     padding: 2px 4px;
     width: 100%;
 }
@@ -58,64 +58,18 @@ main {
     height: auto;
     flex-grow: 1;
 }
+.task button {
+    width: 29px;
+    height: 29px;
+    padding: 0;
+}
 
-
-.task [class$='button'] img {
+.task button img {
     width: auto;
     height: 20px;
 }
 
-.task [class$='button'][disabled] {
+.task button[disabled] {
     background-color: rgb(238, 238, 238);
     border-color: grey;
 }
-
-.task .cancel-button[disabled] {
-    background-color: rgb(228, 228, 228);
-}
-
-/*.task .cancel-button, .delete-button {
-    opacity: 0;
-    visibility: hidden;
-}
-
-.task:hover > .cancel-button,
-.task:hover > .delete-button
- {
-    visibility: visible;
-    opacity: 1;
-}*/
-
-/*.task .cancel-button {
-    border-color: #333138;
-    color: black;
-    background-color: white;
-}
-
-.task .cancel-button:hover {
-    background-color: #333138;
-    color: white;
-}
-
-.task .delete-button {
-    background-color: white; 
-    color: black;
-    border-radius: 2px;
-    border: 2px solid #FF312E;
-}
-
-.task .delete-button:hover {
-    background-color: #FF312E;  
-    color: white;
-}
-
-.task .modify-button {
-    border-color: #3DDC97;
-    color: black;
-    background-color: white;
-}
-
-.task .modify-button:hover {
-    background-color: #3DDC97;
-    color: white;
-}*/
