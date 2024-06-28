@@ -3,7 +3,7 @@ from os.path import exists
 import os
 import datetime
 
-LOGS_FILE = "/data/logs.json" if os.environ["D.get()CKERPROCESS"] else "logs.json"
+LOGS_FILE = "/data/logs.json" if os.environ.get("DOCKER_PROCESS", False) else "logs.json"
 
 logs = {}
 init_date = datetime.datetime.now().strftime("%d/%m/%Y, %H:%M:%S")
