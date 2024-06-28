@@ -1,57 +1,29 @@
-const header = document.getElementById("header");
-let isHeaderVisible = true;
-let lastScrollTop = 0;
+var prevScrollpos = window.pageYOffset;
 
-// Smooth scroll to section when clicking on navigation links
-const links = document.querySelectorAll(".header nav ul li a");
+/* Get the header element and it's position */
+var headerDiv = document.querySelector("header");
+var headerBottom = headerDiv.offsetTop + headerDiv.offsetHeight;
 
-links.forEach((link) => {
-link.addEventListener("click", function (e) {
-    e.preventDefault();
+window.onscroll = () => {
+    var currentScrollPos = window.pageYOffset;
 
-    const targetId = this.getAttribute("href");
-    const targetElement = document.querySelector(targetId);
-
-    if (targetElement) {
-    const offsetTop = targetElement.offsetTop - header.offsetHeight;
-
-    // Scroll smoothly to the target section
-    window.scrollTo({
-        top: offsetTop,
-        behavior: "smooth",
-    });
-
-    // Hide the header after clicking on a link
-    hideHeader();
+    /* if scrolling down, let it scroll out of view as normal */
+    if (prevScrollpos <= currentScrollPos) {
+        headerDiv.classList.remove("fixedToTop");
+        headerDiv.style.top = "-70px";
     }
-});
-});
+    /* otherwise if we're scrolling up, fix the nav to the top */
+    else {
+        headerDiv.classList.add("fixedToTop");
+        headerDiv.style.top = "0";
+    }
 
-// Handle header showing/hiding based on scroll direction and position
-window.addEventListener("scroll", function () {
-let scrollTop = window.pageYOffset || document.documentElement.scrollTop;
-
-if (scrollTop === 0) {
-    // At the top of the page
-    showHeader();
-} else if (scrollTop > lastScrollTop) {
-    // Scrolling down
-    hideHeader();
+    prevScrollpos = currentScrollPos;
 }
 
-lastScrollTop = scrollTop;
-});
+function init() {
+    if (isLogged()) document.querySelector(".enroll-button button").innerText = "Continue tasking"
 
-function hideHeader() {
-if (isHeaderVisible) {
-    header.style.top = `${header.offsetHeight}px`;
-    isHeaderVisible = false;
-}
 }
 
-function showHeader() {
-if (!isHeaderVisible) {
-    header.style.top = "0";
-    isHeaderVisible = true;
-}
-}
+window.addEventListener("DOMContentLoaded", init)
