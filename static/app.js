@@ -24,7 +24,7 @@ async function init() {
     })
     if (!isAuthorized) {
         console.warn("UnauthorizedError: User not logged");
-        window.location.replace("/login");
+        window.location.replace("/sign-in");
     }
     else {
         //get tasks
