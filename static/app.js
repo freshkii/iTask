@@ -211,13 +211,14 @@ function render() {
         if (doneButton.disabled !== t.locked) doneButton.disabled = t.locked
         //  Content label
         if (contentLabel.value !== t.content) contentLabel.value = t.content;
+        if (contentLabel.style.color !== !t.done ? "black" : "grey") contentLabel.style.color = !t.done ? "black" : "grey";
         if (contentLabel.disabled !== !t.inEdit || t.done || t.locked) contentLabel.disabled = !t.inEdit || t.done || t.locked;
         //  Edit button
         if (editButtonIcon.src !== t.inEdit ? '/static/assets/verifier.svg' : "/static/assets/crayon.svg") editButtonIcon.src = t.inEdit ? '/static/assets/verifier.svg' : "/static/assets/crayon.svg";
         if (editButton.style.display !== t.done || t.locked ? "none" : "block") editButton.style.display = t.done || t.locked ? "none" : "block"
         if (editButton.disabled !== t.done || t.locked) editButton.disabled = t.done || t.locked
         //  Lock button
-        if (lockButtonIcon.src !== t.locked ? '/static/assets/bloquer.svg' : "/static/assets/verrouiller-ouvert-alt.svg") lockButtonIcon.src = t.locked ? '/static/assets/bloquer.svg' : "/static/assets/verrouiller-ouvert-alt.svg" 
+        if (lockButtonIcon.src !== t.locked ? '/static/assets/bloquer.svg' : "/static/assets/verrouiller-ouvert-alt.svg") lockButtonIcon.src = t.locked ? '/static/assets/bloquer.svg' : "/static/assets/verrouiller-ouvert-alt.svg"
         if (lockButton.style.display !== t.done ? "none" : "block") lockButton.style.display = t.done ? "none" : "block";
         if (lockButton.disabled !== t.done) lockButton.disabled = t.done;
 
