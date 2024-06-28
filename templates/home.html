@@ -8,41 +8,57 @@
 
 {% block content %}
 
-<div class="main-content">
-    <div id="intro" class="intro_section">
-    <div class="bg"></div>
-    <div class="bg bg2"></div>
-    <div class="bg bg3"></div>
-    <p>Manage Your</p>
-    <p>Life In</p>
-    <p>One Click</p>
-    <a href="/app">
-        <button><div>Start tasking</div></button>
+<section id="hero-banner-section">
+    <div class="hero-banner-text">
+        <p>Manage your</p>
+        <p>life in</p>
+        <p>one click</p>
+    </div>
+    <a class="enroll-button" href="/app">
+        <button>
+            Start tasking
+        </button>
     </a>
+    <a class="scroll-button" href="#qa-section">
+        <button>
+            <img src="{{ url_for('static', filename='assets/scroll.svg')}}" />
+        </button>
+    </a>
+</section>
+<section id="qa-section">
+    <div class="presentation-sub-section">
+        <h2>Why iTask ?</h2>
+        <p>Lorem ipsum dolor sit amet consectetur adipisicing elit. Molestias, nam mollitia sunt exercitationem illum rerum veritatis pariatur distinctio est illo nostrum ex ipsa maxime debitis aspernatur delectus accusantium consequuntur fuga?</p>
     </div>
-    <div id="section1" class="full-size-section">Why iTask</div>
-    <div id="section2" class="frequent_container">
-    <p>Frequently asked questions</p>
-    <div class="questionContainer">
-        <details id="details">
-        <summary>What is iTask ?</summary>
-        <p>
-            iTask is a tool recommended for everyone, it allows you to
-            organise everything at one place.
-        </p>
-        </details>
-        <details id="details">
-        <summary>jsp</summary>
-        caca
-        </details>
-        <details id="details">
-        <summary></summary>
-        pipi
-        </details>
+    <div class="qa-container">
+        <div class="qa">
+            <input type="checkbox" id="q1" class="accordion-input">
+            <label for="q1" class="accordion-label">My first question?</label>
+            <div class="answer">
+                <p>Lorem, ipsum dolor sit amet consectetur adipisicing elit. Ut quia unde numquam exercitationem architecto quasi iure. Et nam eius voluptate voluptas amet! Fugit sapiente asperiores sequi perferendis sunt dignissimos necessitatibus?</p>
+            </div>
+        </div>
+        <div class="qa">
+            <input type="checkbox" id="q2" class="accordion-input">
+            <label for="q2" class="accordion-label">My second question?</label>
+            <div class="answer">
+                <p>Lorem ipsum dolor sit amet consectetur, adipisicing elit. Quae modi saepe eveniet, magni enim maiores voluptatibus numquam corporis obcaecati possimus necessitatibus ducimus. Odit iusto consequuntur obcaecati numquam error soluta rem.</p>
+            </div>
+        </div>
+        <div class="qa">
+            <input type="checkbox" id="q3" class="accordion-input">
+            <label for="q3" class="accordion-label">My third question?</label>
+            <div class="answer">
+                <p>Lorem ipsum dolor, sit amet consectetur adipisicing elit. Animi dolor tempore perspiciatis sunt. Optio, quos molestiae. Officiis est debitis deleniti fugit accusantium, doloribus sed. Eaque laboriosam neque alias omnis deleniti.</p>
+            </div>
+        </div>
     </div>
-    </div>
-    <div id="section3" class="full-size-section">Section 3 Content</div>
-</div>
+</section>
+
+<section id="content-section">
+
+</section>
+
 {% endblock content %}
 
 {% block scripts %}

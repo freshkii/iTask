@@ -1,51 +1,255 @@
 body {
-    font-family: Arial, sans-serif;
-    line-height: 1.6;
-    background-color: #f0f0f0; /* Example background color */
-    text-align: center;
+    scroll-behavior: smooth;
 }
 
-.header {
-    background-color: #333;
-    color: #fff;
-    padding: 10px 0;
-    position: fixed;
-    top: 0;
-    width: 100%;
-    z-index: 1000; /* Ensure header is above other content */
-    transition: top 0.3s ease; /* Smooth transition for hiding/showing */
+main {
+    margin: 0;
+    padding: 0;
+    width: inherit;
     display: flex;
+    justify-content: start;
+}
+
+#hero-banner-section {
+    position: relative;
+    height: 90vh;
+    width: 100%;
+    display: flex;
+    flex-direction: column;
     align-items: center;
     justify-content: center;
-    animation: slide_down 1s;
+    background: rgb(238,174,202);
+    background: radial-gradient(circle, rgba(238,174,202,1) 0%, rgba(148,187,233,1) 100%);
+    overflow: hidden;
+    color: white;
+    text-align: center;
+    gap: 1rem;
 }
 
-.header h1 {
-    margin: 0;
-    padding: 0 20px;
-    font-size: 24px;
+.hero-banner-text {
+    position: relative;
+    font-size: 5rem;
+    font-weight: bold;
+    display: flex;
+    flex-direction: column;
+    align-items:first baseline;
 }
 
-.header nav ul {
-    list-style-type: none;
+.hero-banner-text p {
+    position: relative;
     padding: 0;
-    text-align: right;
+    line-height: 4.5rem;
 }
 
-.header nav ul li {
-    display: inline-block;
-    margin-right: 20px;
+.hero-banner-text p:nth-child(1) {
+    animation: fade_and_slide_in 0.9s ease-in-out;
 }
 
-.header nav ul li a {
-    color: #fff;
+.hero-banner-text p:nth-child(2) {
+    animation: fade_and_slide_in 1.1s ease-in-out;
+}
+
+.hero-banner-text p:nth-child(3) {
+    animation: fade_and_slide_in 1.3s ease-in-out;
+}
+
+.enroll-button {
+    margin-top: 20px;
     text-decoration: none;
-    transition: color 0.3s ease;
+    position: relative;
+    z-index: 1; 
+    box-sizing: border-box;
+    height: 50px; /* set a fixed height so it will not be resized when we zoom the button */
 }
 
-.header nav ul li a:hover {
-    color: #380606;
+.enroll-button button {
+    animation: 1.5s slide_in_button ease-in-out;
+    border: 2px solid rgb(190, 214, 243);
+    border-radius: 10px;
+    padding: 15px 45px;
+    background-color: transparent;
+    color: white;
+    font-size: 18px;
+    cursor: pointer;
+    transition: background border box-shadow 0.6s ease-in-out;
 }
+
+.enroll-button button:hover {
+    border: transparent;
+    background: rgb(177,174,238);
+    box-shadow: 0 0 5px 5px rgba(182, 184, 204, 0.5);
+    font-size: 18.3px;
+}
+
+.enroll-button button:focus {
+    background-color: rgb(124, 153, 189);
+    border-color: transparent;
+}
+
+.scroll-button {
+    position: absolute;
+    bottom: 10px;
+    right: 10px;
+    background-color: transparent;
+    animation:
+        move_up_down 0.5s infinite alternate ease-in-out,
+        1.5s slide_in_button ease-in-out;
+}
+
+.scroll-button button:hover {
+    background-color: transparent;
+}
+
+.scroll-button button:focus {
+    background-color: transparent;
+}
+
+.scroll-button button {
+    border-radius: 50%;
+}
+
+.scroll-button img {
+    width: 70px;
+    object-fit:fill;
+    height: auto;
+}
+
+#qa-section {
+    display: flex;
+    flex-direction: column;
+    align-items: first baseline;
+    padding: 20px; 
+    width: 800px;
+}
+
+.presentation-sub-section {
+    padding: 40px 0;
+    width: inherit;
+}
+
+
+h2 {
+    font-size: 2rem;
+}
+
+.qa {
+    margin-bottom: 10px;
+    width: inherit;
+}
+
+.accordion-input {
+    display: none;
+}
+
+.accordion-label {
+    display: block;
+    cursor: pointer;
+    padding: 10px;
+    border-bottom: 1px solid #ccc;
+    transition: background-color 0.3s;
+}
+
+.answer {
+    max-height: 0;
+    overflow: hidden;
+    transition: max-height 0.3s ease-out;
+}
+
+.accordion-input:checked ~ .answer {
+    max-height: 200px;
+    transition: max-height 0.3s ease-out;
+}
+
+/* Arrow icon */
+.accordion-label::after {
+    content: "\25B8";
+    float: right;
+    transition: transform 0.3s ease-out;
+}
+
+.accordion-input:checked + .accordion-label::after {
+    transform: rotate(90deg);
+}
+
+
+@keyframes slide_in_button {
+    0% {
+        opacity: 0;
+    }
+    50% {
+        opacity: 0.3;
+        transform: translateY(100%);
+    }
+    100% {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+@keyframes fade_and_slide_in {
+    0% {
+        opacity: 0;
+        color: rgba(255, 255, 255, 0);
+        transform: translateY(100%);
+    }
+    50% {
+        opacity: 1;
+        color: rgba(255, 255, 255, 0);
+        transform: translateY(50%);
+    }
+    100% {
+        opacity: 1;
+        color: rgba(255, 255, 255, 1);
+        transform: translateY(0);
+    }
+}
+
+@keyframes move_in {
+    0% {
+        transform: translateY(0);
+    }
+    50% {
+        transform: translateY(-100%);
+    }
+    100% {
+        transform: translateY(0);
+    }
+}
+
+@keyframes move_up_down {
+    0% {
+        bottom: 10px;
+    }
+    100% {
+        bottom: 30px;
+    }
+}
+
+/*
+
+.hero-banner {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: space-evenly;
+    background-color: red;
+    width: 100%;
+    height: 100svh;
+}
+
+.hero-banner-text {
+    display: flex;
+    flex-direction: column;
+    align-items: first baseline;
+    font-size: 4.6rem;
+    font-weight: bold;
+}
+
+.hero-banner button {
+    padding: 20px;
+    font-size: 1rem;
+    border-radius: 15px;
+} */
 
 .full-size-section {
     height: 100vh; /* Full viewport height for each section */
@@ -55,6 +259,7 @@ body {
     align-items: center;
     justify-content: center;
 }
+
 .frequent_container{
     height: 100vh; /* Full viewport height for each section */
     background-color: #fff; /* Example background color */
@@ -72,20 +277,19 @@ details{
     margin-right: 250px;
     overflow:hidden;
 }
+
 details summary{
     background-color:blue;
 }
 
-details:open summary{
+details[open] summary{
     border-bottom:0px;
 }
 
 
-
-
 .intro_section {
     position:relative;
-    height: 100vh; /* Full viewport height for each section */
+    height: auto;
     font-size: 75px;
     font-weight:bold;
     display: flex;
