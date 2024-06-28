@@ -65,7 +65,7 @@ async function signIn(username, password) {
       console.info("Successfully signed-in");
       localStorage.setItem("token", data["token"]);
       localStorage.setItem("username", username);
-      window.location.replace(`/app`);
+      window.location.assign(`/app`);
     }
   }
 }
@@ -86,7 +86,7 @@ async function logout() {
   } else {
     localStorage.removeItem("token");
     localStorage.removeItem("username");
-    window.location.replace("/");
+    window.location.assign("/");
   }
 }
 

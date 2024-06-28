@@ -10,9 +10,8 @@
 
 <section id="hero-banner-section">
     <div class="hero-banner-text">
-        <p>Les tâches</p>
-        <p>on s'en</p>
-        <p>détache</p>
+        <p>"From tasks,</p>
+        <p>&nbsp&nbspwe detask"</p>
     </div>
     <a class="enroll-button" href="/app">
         <button>
@@ -62,5 +61,5 @@
 {% endblock content %}
 
 {% block scripts %}
-<script src="{{ url_for('static', filename='home.js')}}"></script>
+<script defer src="{{ url_for('static', filename='home.js')}}"></script>
 {% endblock scripts %}

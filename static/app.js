@@ -1,11 +1,15 @@
-/*    task: {
-        id: string;
-        content: string;
-        done: bool,
-        locked: bool,
-        inEdit? bool
-    }
- task : list [id, content, checked, canceled]*/
+/**
+ internalTask: {
+    id: string;
+    content: string;
+    done: bool,
+    locked: bool,
+    inEdit? bool
+}
+
+arrayTask: [id, content, checked, canceled]
+*/
+
 const taskContainerDiv = document.getElementById('task-container');
 const createTaskButton = document.getElementById('create-task-button');
 let taskList = [];
@@ -20,7 +24,7 @@ async function init() {
     })
     if (!isAuthorized) {
         console.warn("UnauthorizedError: User not logged");
-        window.location.assign("/login");
+        window.location.replace("/login");
     }
     else {
         //get tasks
@@ -40,12 +44,12 @@ async function init() {
         }
 
         createTaskButton.addEventListener('click', () => {
-            if (taskContainerDiv.querySelector("#t-0") === null) renderNewTask(emptyTask, true)
+            if (taskContainerDiv.querySelector("#t-0") === null) _renderTask(emptyTask, true)
         });
         document.addEventListener("keydown", (e) => {
-            if (e.key === "t" && taskContainerDiv.querySelector("#t-0") === null) {
+            if ((e.key === "t" || e.key === "T") && taskContainerDiv.querySelector("#t-0") === null) {
                 e.preventDefault();
-                renderNewTask(emptyTask, true)
+                _renderTask(emptyTask, true)
             }
 
         })
@@ -57,15 +61,31 @@ async function init() {
 
 }
 
+/**
+ * Convert an arrayTask from the backend to an internalTask for the frontend
+ * @param {[]} arrayTask 
+ * @returns {} internalTask
+ */
 function ToInternalTask(arrayTask) {
-    console.log(arrayTask[0])
     return { id: arrayTask[0], content: arrayTask[1], done: arrayTask[2] === 1, locked: arrayTask[3] === 1, inEdit: false };
 }
 
+/**
+ * Convert an internalTask from the frontend to an arrayTask for the backend
+ * @param {} internalTask 
+ * @returns {[]} arrayTask
+ */
 function ToArraytask(internalTask) {
     return [internalTask.id, internalTask.content, internalTask.done, internalTask.locked];
 }
 
+/**
+ * Perform a request to the backend
+ * @param {string} url 
+ * @param {string} method 
+ * @param {*} body 
+ * @returns Promise<Response>
+ */
 async function performRequest(url, method, body) {
     if (url === undefined) throw new Error("Cannot perform request, please provide an URL");
     if (method === undefined) throw new Error("Cannot perform request, please provide a Method");
@@ -86,42 +106,63 @@ async function performRequest(url, method, body) {
         })
 }
 
+/**
+ * Get all task from the storage
+ */
 const getTasksRequest = () => performRequest(`/api/task/read?username=${username}&token=${token}`, 'GET');
+/**
+ * Delete a task in storage
+ * @param {task} task 
+ */
 function deleteTaskRequest(task) {
     taskList.splice(taskList.findIndex(t => t.id === task.id), 1);
     render();
     return performRequest('/api/task/delete', 'DELETE', { task: ToArraytask(task), username: username, token: token });
 }
-function updateTaskRequest(task) {
-    taskList[taskList.findIndex(t => t.id === task.id)] = task;
+/**
+ * Update a task in storage
+ * @param {task} newTask 
+ */
+function updateTaskRequest(newTask) {
+    taskList[taskList.findIndex(t => t.id === newTask.id)] = newTask;
     render();
-    return performRequest('/api/task/update', 'PUT', { task: ToArraytask(task), username: username, token: token });
+    return performRequest('/api/task/update', 'PUT', { task: ToArraytask(newTask), username: username, token: token });
 }
+/**
+ * Create a task in storage
+ * @param {task} task 
+ */
 async function createTaskRequest(task) {
     const response = await performRequest('/api/task/create', 'POST', { task: ToArraytask(task), username: username, token: token });
     taskList.push({ ...task, id: response.id })
     render();
     return response
 }
-// -- TASKS --
-function assertTask(t) {
-    if (t === undefined) throw new Error("Task is undefined");
-    if (t.id === null) throw new Error("Cannot update element " + "unknown" + " because " + "id" + "is null")
-    if (t.content === null) throw new Error("Cannot update element " + t.id + " because " + "content" + "is null")
-    if (t.id !== 0 && t.content.length === 0) console.warn("Warning: Content of element " + t.id + " is empty");
-    if (t.done === null) throw new Error("Cannot update element " + t.id + " because " + "done" + "is null")
-    if (t.locked === null) throw new Error("Cannot update element " + t.id + " because " + "locked" + "is null")
+
+/**
+ * Ensure a task object is correct and contain all properties
+ * @param {task} toTestTask
+ * @throws Error
+ */
+function assertTask(toTestTask) {
+    if (toTestTask === undefined) throw new Error("Task is undefined");
+    if (toTestTask.id === null) throw new Error("Cannot update element " + "unknown" + " because " + "id" + "is null")
+    if (toTestTask.content === null) throw new Error("Cannot update element " + toTestTask.id + " because " + "content" + "is null")
+    if (toTestTask.id !== 0 && toTestTask.content.length === 0) console.warn("Warning: Content of element " + toTestTask.id + " is empty");
+    if (toTestTask.done === null) throw new Error("Cannot update element " + toTestTask.id + " because " + "done" + "is null")
+    if (toTestTask.locked === null) throw new Error("Cannot update element " + toTestTask.id + " because " + "locked" + "is null")
 }
 
+/**
+ * Update the rendered DOM from the taskList
+ */
 function render() {
-    //update the current rendered list
-    //compare the rendered list with the task list
     //-> start by cheking for new tasks to render
     taskList.map(t => {
         if (taskContainerDiv.querySelector("#t-" + t.id) === null) {
             //the task doesn't exist
             console.info('Creating task ' + t.id);
-            renderNewTask(t, false)
+            _renderTask(t, false)
         }
     })
 
@@ -135,9 +176,9 @@ function render() {
         }
     }
 
-    //Update properies
+    //And finally update task's properies
     taskList.map(t => {
-        //Check current task
+        //Check for task corruption
         assertTask(t);
         //define consts
         const elementId = "t-" + t.id;
@@ -183,7 +224,13 @@ function render() {
     })
 }
 
-function renderNewTask(task, input) {
+/**
+ * Generate a new task
+ * @private
+ * @param {task} task 
+ * @param {boolean} input if task to render is an input
+ */
+function _renderTask(task, input) {
     assertTask(task);
     //Construct task
     const Container = document.createElement('div');

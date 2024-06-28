@@ -16,6 +16,8 @@
 html {
     width: 100%;
     height: 100svh;
+    scroll-behavior: smooth;
+    overflow-x: hidden;
 }
 
 body {
@@ -31,10 +33,20 @@ header {
     justify-content: center;
     align-items: center;
     width: 100%;
+    height: 70px;
     padding: 3px 0;
     border-bottom: 1px solid rgb(236, 236, 236);
     background-color: var(--background-secondary);
     position: relative;
+    transition: all 0.2s ease-in-out;
+    z-index: 100;
+    position: fixed;
+}
+
+header.fixedToTop {
+    top: 0;
+    left: 0;
+    right: 0;
 }
 
 header #Title {
@@ -67,12 +79,14 @@ header .buttons-container div {
 main {
     display: flex;
     flex-direction: column;
-    flex-grow: 1;
     align-items: center;
-    justify-content: center;
-    position: relative;
+    justify-content: center
+}
+
+main>* {
     padding: 20px 10vw;
 }
+
 
 
 /* default button */

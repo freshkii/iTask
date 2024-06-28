@@ -1,6 +1,5 @@
-body {
-  overflow: hidden;
-  scroll-behavior:1s;
+main {
+  height: 100%;
 }
 
 #form {
