@@ -1,14 +1,17 @@
 import json
 from os.path import exists
+import os
 import datetime
+
+LOGS_FILE = "/data/logs.json" if os.environ["D.get()CKERPROCESS"] else "logs.json"
 
 logs = {}
 init_date = datetime.datetime.now().strftime("%d/%m/%Y, %H:%M:%S")
 
 
 # create the logs.json file in case it's not already
-if not exists("logs.json"):
-    with open("logs.json", "w") as f:
+if not exists(LOGS_FILE):
+    with open(LOGS_FILE, "w") as f:
         pass
 
 def add_log(log: str):

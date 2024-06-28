@@ -1,4 +1,4 @@
-version: "3.12"
+version: "2.22"
 services:
   server:
     build: .
@@ -6,4 +6,4 @@ services:
       - '5000:5000'
     volumes:
       - /data/data.db
-      - ./logs.json:/data/logs.json
+      - /data/logs.json

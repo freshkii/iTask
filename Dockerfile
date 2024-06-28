@@ -3,6 +3,8 @@ FROM python:${PYTHON_VERSION}-slim as base
 
 WORKDIR /app
 
+ENV DOCKER_PROCESS = "1"
+
 COPY requirements.txt .
 
 RUN python -m pip install -r requirements.txt

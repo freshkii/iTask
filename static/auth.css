@@ -1,6 +1,6 @@
 body {
   overflow: hidden;
-  scroll-behavior: none;
+  scroll-behavior:1s;
 }
 
 #form {
@@ -112,4 +112,14 @@ input[type="submit"] {
 
 .title {
   margin-bottom: 10px;
+}
+
+p.redirect-text {
+  padding: 8px 0;
+  font-size: 0.8rem;
+  color: rgb(77, 87, 100);
+}
+
+.redirect-text a {
+  color: var(--secondary);
 }
