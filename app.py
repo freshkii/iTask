@@ -13,5 +13,5 @@ app.register_blueprint(task_blueprint, url_prefix='/api/task')
 app.register_blueprint(auth_blueprint, url_prefix='/api/auth')
 
 if __name__ == '__main__':
-    app.run(debug=True)
+    app.run(host='0.0.0.0', port=5000)
     save_logs()
